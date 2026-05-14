@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fank.f1k2.business.dao.QuestionBankMapper">
+
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        qb.id,
+        qb.CODE,
+        qb.NAME,
+        qb.image,
+        qb.create_date,
+        count(ci.id) AS collectionCount,
+        SUM(CASE WHEN ci.question_type = '单选题' THEN 1 ELSE 0 END) AS singleCount,
+        SUM(CASE WHEN ci.question_type = '多选题' THEN 1 ELSE 0 END) AS multipleCount,
+        SUM(CASE WHEN ci.question_type = '判断题' THEN 1 ELSE 0 END) AS judgeCount
+        FROM
+        question_bank qb
+        LEFT JOIN collection_info ci ON qb.id = ci.collection_id
+        WHERE
+        1 = 1
+        <if test="queryFrom.code != null and queryFrom.code != ''">
+            AND code LIKE CONCAT('%',#{queryFrom.code},'%')
+        </if>
+        <if test="queryFrom.name != null and queryFrom.name != ''">
+            AND name LIKE CONCAT('%',#{queryFrom.name},'%')
+        </if>
+        group by qb.id
+        ORDER BY
+        qb.create_date DESC
+    </select>
+</mapper>
