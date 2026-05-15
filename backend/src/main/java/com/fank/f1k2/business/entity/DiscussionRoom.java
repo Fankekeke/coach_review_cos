@@ -65,21 +65,21 @@ public class DiscussionRoom implements Serializable {
     /**
      * 开始时间
      */
-    private LocalDateTime startTime;
+    private String startTime;
 
     /**
      * 结束时间
      */
-    private LocalDateTime endTime;
+    private String endTime;
 
     /**
      * 创建人
      */
-    private Long createdBy;
+    private Integer createdBy;
 
-    private LocalDateTime createTime;
+    private String createTime;
 
-    private LocalDateTime updateTime;
+    private String updateTime;
 
 
 }

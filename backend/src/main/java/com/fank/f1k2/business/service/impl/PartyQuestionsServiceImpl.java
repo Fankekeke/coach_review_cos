@@ -18,10 +18,10 @@ import java.util.List;
 public class PartyQuestionsServiceImpl extends ServiceImpl<PartyQuestionsMapper, PartyQuestions> implements IPartyQuestionsService {
 
     /**
-     * 分页获取教练社区问题表
+     * 分页获取教练问题表
      *
      * @param page      分页对象
-     * @param queryFrom 教练社区问题表
+     * @param queryFrom 教练问题表
      * @return 结果
      */
     @Override

@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
- * 贴子模块
+ * 模块
  *
  * @author FanK
  */

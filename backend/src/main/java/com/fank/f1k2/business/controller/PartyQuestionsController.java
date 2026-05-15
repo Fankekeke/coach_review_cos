@@ -19,7 +19,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 教练社区问题表 控制层
+ * 教练问题表 控制层
  *
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
@@ -33,10 +33,10 @@ public class PartyQuestionsController {
     private final IStaffInfoService staffInfoService;
 
     /**
-     * 分页获取教练社区问题表
+     * 分页获取教练问题表
      *
      * @param page      分页对象
-     * @param queryFrom 教练社区问题表
+     * @param queryFrom 教练问题表
      * @return 结果
      */
     @GetMapping("/page")
@@ -55,7 +55,7 @@ public class PartyQuestionsController {
     }
 
     /**
-     * 查询教练社区问题表详情
+     * 查询教练问题表详情
      *
      * @param id 主键ID
      * @return 结果
@@ -66,7 +66,7 @@ public class PartyQuestionsController {
     }
 
     /**
-     * 查询教练社区问题表列表
+     * 查询教练问题表列表
      *
      * @return 结果
      */
@@ -76,9 +76,9 @@ public class PartyQuestionsController {
     }
 
     /**
-     * 新增教练社区问题表
+     * 新增教练问题表
      *
-     * @param addFrom 教练社区问题表对象
+     * @param addFrom 教练问题表对象
      * @return 结果
      */
     @PostMapping
@@ -102,9 +102,9 @@ public class PartyQuestionsController {
     }
 
     /**
-     * 修改教练社区问题表
+     * 修改教练问题表
      *
-     * @param editFrom 教练社区问题表对象
+     * @param editFrom 教练问题表对象
      * @return 结果
      */
     @PutMapping
@@ -113,7 +113,7 @@ public class PartyQuestionsController {
     }
 
     /**
-     * 删除教练社区问题表
+     * 删除教练问题表
      *
      * @param ids 删除的主键ID
      * @return 结果

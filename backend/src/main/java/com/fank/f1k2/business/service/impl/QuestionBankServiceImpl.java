@@ -8,10 +8,8 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fank.f1k2.business.entity.CollectionInfo;
-import com.fank.f1k2.business.entity.CollectionOptions;
-import com.fank.f1k2.business.entity.QuestionBank;
-import com.fank.f1k2.business.dao.QuestionBankMapper;
+import com.fank.f1k2.business.dao.*;
+import com.fank.f1k2.business.entity.*;
 import com.fank.f1k2.business.entity.vo.CollectionItem;
 import com.fank.f1k2.business.service.ICollectionInfoService;
 import com.fank.f1k2.business.service.ICollectionOptionsService;
@@ -36,6 +34,18 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
 
     @Resource
     private ICollectionOptionsService collectionOptionsService;
+
+    @Resource
+    private StaffInfoMapper staffInfoMapper;
+
+    @Resource
+    private AssessmentTaskMapper assessmentTaskMapper;
+
+    @Resource
+    private AssessmentSubmissionMapper assessmentSubmissionMapper;
+
+    @Resource
+    private AnswerRecordMapper answerRecordMapper;
 
     /**
      * 分页获取题库信息
@@ -220,6 +230,48 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
             collectionInfo.setCollectionOptionsList(optionsList);
         }
         result.put("collection", collectionInfoList);
+        return result;
+    }
+
+    /**
+     * 查询用户考核信息
+     *
+     * @param userId 用户ID
+     * @return 详情
+     */
+    @Override
+    public LinkedHashMap<String, Object> queryAssessmentByUser(Integer userId) {
+        StaffInfo staffInfo = staffInfoMapper.selectOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>() {
+            {
+                put("staff", staffInfo);
+            }
+        };
+        // 获取题目、文档、视频审核内容
+        List<QuestionBank> questionBankList = this.list(Wrappers.<QuestionBank>lambdaQuery().eq(staffInfo.getTagId() != null, QuestionBank::getTagId, staffInfo.getTagId()).or().isNull(QuestionBank::getTagId));
+        // 答题记录
+        List<AnswerRecord> answerRecordList = answerRecordMapper.selectList(Wrappers.<AnswerRecord>lambdaQuery().eq(AnswerRecord::getUserId, staffInfo.getId()));
+
+        List<LinkedHashMap<String, Object>> answerRecordMap = new ArrayList<>();
+        for (QuestionBank bank : questionBankList) {
+            LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+            map.put("bank", bank);
+            map.put("score", answerRecordList.stream().filter(item -> item.getBankId().equals(bank.getId())));
+        }
+        result.put("answerRecord", answerRecordMap);
+
+        // 获取考核任务信息
+        List<AssessmentTask> assessmentTaskList = assessmentTaskMapper.selectList(Wrappers.<AssessmentTask>lambdaQuery().eq(staffInfo.getTagId() != null, AssessmentTask::getTagId, staffInfo.getTagId()).or().isNull(AssessmentTask::getTagId));
+        // 考核记录
+        List<AssessmentSubmission> assessmentSubmissionList = assessmentSubmissionMapper.selectList(Wrappers.<AssessmentSubmission>lambdaQuery().eq(AssessmentSubmission::getUserId, staffInfo.getId()));
+        List<LinkedHashMap<String, Object>> taskRecordMap = new ArrayList<>();
+        for (AssessmentTask assessmentTask : assessmentTaskList) {
+            LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+            map.put("bank", assessmentTask);
+            map.put("score", assessmentSubmissionList.stream().filter(item -> item.getTaskId().equals(assessmentTask.getId())));
+        }
+        result.put("taskRecord", taskRecordMap);
         return result;
     }
 }

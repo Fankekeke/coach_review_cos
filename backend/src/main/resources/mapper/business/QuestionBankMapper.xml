@@ -9,6 +9,9 @@
         qb.NAME,
         qb.image,
         qb.create_date,
+
+        ti.name AS tagName,
+
         count(ci.id) AS collectionCount,
         SUM(CASE WHEN ci.question_type = '单选题' THEN 1 ELSE 0 END) AS singleCount,
         SUM(CASE WHEN ci.question_type = '多选题' THEN 1 ELSE 0 END) AS multipleCount,
@@ -16,6 +19,7 @@
         FROM
         question_bank qb
         LEFT JOIN collection_info ci ON qb.id = ci.collection_id
+        LEFT JOIN tag_info ti ON (ti.id = qb.tag_id)
         WHERE
         1 = 1
         <if test="queryFrom.code != null and queryFrom.code != ''">

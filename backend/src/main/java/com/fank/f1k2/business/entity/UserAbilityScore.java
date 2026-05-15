@@ -30,7 +30,7 @@ public class UserAbilityScore implements Serializable {
     /**
      * 用户ID
      */
-    private Long userId;
+    private Integer userId;
 
     /**
      * 所属维度

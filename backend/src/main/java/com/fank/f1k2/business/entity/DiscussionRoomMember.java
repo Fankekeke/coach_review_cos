@@ -30,19 +30,19 @@ public class DiscussionRoomMember implements Serializable {
     /**
      * 房间ID
      */
-    private Long roomId;
+    private Integer roomId;
 
     /**
      * 用户ID
      */
-    private Long userId;
+    private Integer userId;
 
-    private LocalDateTime joinTime;
+    private String joinTime;
 
     /**
      * 离开时间
      */
-    private LocalDateTime leaveTime;
+    private String leaveTime;
 
     /**
      * 状态 0等待 1讨论中 2已退出 3已完成

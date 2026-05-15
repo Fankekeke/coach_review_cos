@@ -60,18 +60,20 @@ public class AssessmentTask implements Serializable {
     /**
      * 截止时间
      */
-    private LocalDateTime deadline;
+    private String deadline;
 
     /**
      * 状态 0关闭 1进行中
      */
     private Integer status;
 
-    private Long createdBy;
+    private Integer createdBy;
 
-    private LocalDateTime createTime;
+    private String createTime;
 
-    private LocalDateTime updateTime;
+    private String updateTime;
+
+    private Integer tagId;
 
 
 }

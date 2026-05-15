@@ -1,5 +1,6 @@
 package com.fank.f1k2.business.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.io.Serializable;
 
@@ -93,6 +94,34 @@ public class StaffInfo implements Serializable {
      * 用户ID
      */
     private Integer userId;
+
+    private Integer tagId;
+
+    /**
+     * 专业技能
+     */
+    private BigDecimal professionalScore;
+
+    /**
+     * 沟通能力
+     */
+    private BigDecimal communicationScore;
+
+    /**
+     * 团队协作
+     */
+    private BigDecimal teamworkScore;
+
+    /**
+     * 应急处理
+     */
+    private BigDecimal emergencyScore;
+
+    /**
+     * 学习能力
+     */
+    private BigDecimal learningScore;
+
 
     /**
      * 部门名称

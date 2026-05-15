@@ -33,24 +33,30 @@ public class DiscussionScore implements Serializable {
     private Long userId;
 
     /**
-     * 发言次数评分
+     * 专业技能
      */
-    private BigDecimal speechCountScore;
+    private BigDecimal professionalScore;
 
     /**
-     * 观点采纳评分
+     * 沟通能力
      */
-    private BigDecimal adoptedScore;
+    private BigDecimal communicationScore;
 
     /**
-     * 团队协作评分
+     * 团队协作
      */
     private BigDecimal teamworkScore;
 
     /**
-     * 沟通能力评分
+     * 应急处理
      */
-    private BigDecimal communicationScore;
+    private BigDecimal emergencyScore;
+
+    /**
+     * 学习能力
+     */
+    private BigDecimal learningScore;
+
 
     /**
      * 总分

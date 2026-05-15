@@ -52,6 +52,17 @@ public class QuestionBankController {
     }
 
     /**
+     * 查询用户自我评估信息
+     *
+     * @param userId 用户ID
+     * @return 列表
+     */
+    @GetMapping("/queryAssessmentByUser")
+    public R queryAssessmentByUser(Integer userId) {
+        return R.ok(bulletinInfoService.queryAssessmentByUser(userId));
+    }
+
+    /**
      * 查询题库信息列表
      *
      * @return 结果

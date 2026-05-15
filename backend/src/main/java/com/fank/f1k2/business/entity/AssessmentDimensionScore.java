@@ -31,7 +31,7 @@ public class AssessmentDimensionScore implements Serializable {
     /**
      * 提交ID
      */
-    private Long submissionId;
+    private Integer submissionId;
 
     /**
      * 能力维度
@@ -43,7 +43,7 @@ public class AssessmentDimensionScore implements Serializable {
      */
     private BigDecimal score;
 
-    private LocalDateTime createTime;
+    private String createTime;
 
 
 }

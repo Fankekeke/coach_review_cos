@@ -54,4 +54,12 @@ public interface IQuestionBankService extends IService<QuestionBank> {
      * @return 详情
      */
     LinkedHashMap<String, Object> queryBankDetail(Integer bandId);
+
+    /**
+     * 查询用户考核信息
+     *
+     * @param userId 用户ID
+     * @return 详情
+     */
+    LinkedHashMap<String, Object> queryAssessmentByUser(Integer userId);
 }

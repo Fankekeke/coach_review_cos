@@ -15,10 +15,10 @@ import java.util.List;
 public interface PartyQuestionsMapper extends BaseMapper<PartyQuestions> {
 
     /**
-     * 分页获取教练社区问题表
+     * 分页获取教练问题表
      *
      * @param page      分页对象
-     * @param queryFrom 教练社区问题表
+     * @param queryFrom 教练问题表
      * @return 结果
      */
     IPage<LinkedHashMap<String, Object>> queryPage(Page<PartyQuestions> page, @Param("queryFrom") PartyQuestions queryFrom);

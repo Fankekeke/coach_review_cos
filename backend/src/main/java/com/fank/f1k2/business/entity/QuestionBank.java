@@ -52,6 +52,16 @@ public class QuestionBank implements Serializable {
     private String createDate;
 
     /**
+     * 标签ID
+     */
+    private Integer tagId;
+
+    /**
+     * 维度
+     */
+    private String dimension;
+
+    /**
      * 题库选项集合
      */
 //    @TableField(exist = false)

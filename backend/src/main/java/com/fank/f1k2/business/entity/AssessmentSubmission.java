@@ -19,7 +19,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 @Accessors(chain = true)
 public class AssessmentSubmission implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final Long serialVersionUID = 1L;
 
     /**
     * 主键ID
@@ -28,9 +28,9 @@ public class AssessmentSubmission implements Serializable {
     private Integer id;
 
 
-    private Long taskId;
+    private Integer taskId;
 
-    private Long userId;
+    private Integer userId;
 
     /**
      * 状态 0未提交 1待评 2已评
@@ -80,21 +80,21 @@ public class AssessmentSubmission implements Serializable {
     /**
      * 提交时间
      */
-    private LocalDateTime submitTime;
+    private String submitTime;
 
     /**
      * 评分管理员
      */
-    private Long reviewedBy;
+    private Integer reviewedBy;
 
     /**
      * 评分时间
      */
-    private LocalDateTime reviewedTime;
+    private String reviewedTime;
 
-    private LocalDateTime createTime;
+    private String createTime;
 
-    private LocalDateTime updateTime;
+    private String updateTime;
 
 
 }

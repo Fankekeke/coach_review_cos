@@ -27,16 +27,16 @@ public class DiscussionSpeechRecord implements Serializable {
     private Integer id;
 
 
-    private Long roomId;
+    private Integer roomId;
 
-    private Long userId;
+    private Integer userId;
 
     /**
      * 发言内容
      */
     private String speechContent;
 
-    private LocalDateTime speechTime;
+    private String speechTime;
 
     /**
      * 观点是否被采纳
@@ -48,7 +48,7 @@ public class DiscussionSpeechRecord implements Serializable {
      */
     private Integer conflictResolutionFlag;
 
-    private LocalDateTime createTime;
+    private String createTime;
 
 
 }

@@ -61,6 +61,11 @@ public class AnswerRecord implements Serializable {
      */
     private String createDate;
 
+    /**
+     * 维度
+     */
+    private String dimension;
+
     @TableField(exist = false)
     private List<CollectionItem> collectionItemList;
     @TableField(exist = false)

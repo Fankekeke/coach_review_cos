@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 
 /**
- * 教练社区问题表
+ * 教练问题表
  *
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
  */
