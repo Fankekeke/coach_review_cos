@@ -47,5 +47,6 @@ public class UserAbilityScore implements Serializable {
      */
     private BigDecimal finalScore;
 
+    private String createDate;
 
 }

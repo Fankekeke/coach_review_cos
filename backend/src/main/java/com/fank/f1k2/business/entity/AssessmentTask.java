@@ -2,6 +2,8 @@ package com.fank.f1k2.business.entity;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -74,6 +76,9 @@ public class AssessmentTask implements Serializable {
     private String updateTime;
 
     private Integer tagId;
+
+    @TableField(exist = false)
+    private String tagName;
 
 
 }

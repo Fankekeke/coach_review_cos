@@ -2,4 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.AssessmentTaskMapper">
 
+    <!-- 分页获取自我评估任务 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        ast.id,
+        ast.task_name,
+        ast.task_type,
+        ast.task_dimension,
+        ast.task_description,
+        ast.scoring_standard,
+        ast.reference_material,
+        ast.deadline,
+        ast.status,
+        ast.created_by,
+        ast.create_time,
+        ast.update_time,
+        ast.tag_id,
+
+        ti.name AS tag_name
+
+        FROM assessment_task ast
+        LEFT JOIN tag_info ti on (ti.id = ast.tag_id)
+        WHERE 1 = 1
+        <if test="queryFrom.taskName != null and queryForm.taskName != ''">
+            AND ast.task_name like CONCAT("%",#{queryForm.taskName},"%")
+        </if>
+        <if test="queryForm.tagName != null and queryForm.tagName != ''">
+            AND ti.name like CONCAT("%",#{queryForm.tagName},"%")
+        </if>
+        <if test="queryForm.taskType != null and queryForm.taskType != ''">
+            AND ast.task_type = #{queryForm.taskType}
+        </if>
+        ORDER BY ast.create_time DESC
+    </select>
 </mapper>

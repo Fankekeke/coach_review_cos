@@ -16,6 +16,7 @@ import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
@@ -34,6 +35,10 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
 
     @Resource
     private DiscussionScoreMapper discussionScoreMapper;
+
+    @Resource
+    private UserAbilityScoreMapper userAbilityScoreMapper;
+
 
     /**
      * 分页获取教练管理

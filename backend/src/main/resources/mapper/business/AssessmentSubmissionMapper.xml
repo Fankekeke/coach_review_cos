@@ -2,4 +2,60 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.AssessmentSubmissionMapper">
 
+    <!-- 分页获取评估任务提交表 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        SELECT
+        ass.id,
+        ass.task_id,
+        ass.user_id,
+        ass.submission_status,
+        ass.answer_content,
+        ass.video_url,
+        ass.document_url,
+        ass.draft_flag,
+        ass.auto_score,
+        ass.manual_score,
+        ass.final_score,
+        ass.teacher_comment,
+        ass.submit_time,
+        ass.reviewed_by,
+        ass.reviewed_time,
+        ass.create_time,
+        ass.update_time,
+
+        ast.task_name,
+        ast.task_type,
+        ast.task_dimension,
+        ast.task_description,
+        ast.scoring_standard,
+
+        ti.name AS tag_name,
+
+        si.NAME AS staff_name,
+        si.staff_sex AS staff_sex,
+        si.images AS staff_images,
+        si.phone AS staff_phone,
+
+        FROM
+        assessment_submission ass
+        LEFT JOIN assessment_task ast ON (ast.id = ass.task_id)
+        LEFT JOIN staff_info si ON (si.id = ass.user_id)
+        LEFT JOIN tag_info ti on (ti.id = ast.tag_id)
+        WHERE
+        1 = 1
+        <if test="queryFrom.taskName != null and queryForm.taskName != ''">
+            AND ast.task_name like CONCAT("%",#{queryForm.taskName},"%")
+        </if>
+        <if test="queryForm.tagName != null and queryForm.tagName != ''">
+            AND ti.name like CONCAT("%",#{queryForm.tagName},"%")
+        </if>
+        <if test="queryForm.taskType != null and queryForm.taskType != ''">
+            AND ast.task_type = #{queryForm.taskType}
+        </if>
+        <if test="queryFrom.staffName != null and queryForm.staffName != ''">
+            AND si.NAME like CONCAT("%",#{queryForm.staffName},"%")
+        </if>
+        ORDER BY
+        ass.create_time DESC
+    </select>
 </mapper>

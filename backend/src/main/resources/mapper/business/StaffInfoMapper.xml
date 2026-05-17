@@ -16,12 +16,19 @@
         si.email,
         si.phone,
         si.sys_user_id,
-        si.dept_id,
         si.del_flag,
-        dept.DEPT_NAME AS deptName
+        si.tag_id,
+
+        si.professional_score,
+        si.communication_score,
+        si.teamwork_score,
+        si.emergency_score,
+        si.learning_score,
+
+        ti.name AS tagName
         FROM
         staff_info si
-        LEFT JOIN t_dept dept ON (dept.DEPT_ID = si.dept_id)
+        LEFT JOIN tag_info ti ON (ti.id = si.tag_id)
         WHERE
         1 = 1
         AND si.del_flag = 0
@@ -31,8 +38,8 @@
         <if test="queryForm.name != null and queryForm.name != ''">
             AND si.name like CONCAT("%",#{queryForm.name},"%")
         </if>
-        <if test="queryForm.deptName != null and queryForm.deptName != ''">
-            AND dept.DEPT_NAME like CONCAT("%",#{queryForm.deptName},"%")
+        <if test="queryForm.tagName != null and queryForm.tagName != ''">
+            AND ti.name like CONCAT("%",#{queryForm.tagName},"%")
         </if>
         ORDER BY
         si.create_date DESC
@@ -52,12 +59,19 @@
         si.email,
         si.phone,
         si.sys_user_id,
-        si.dept_id,
         si.del_flag,
-        dept.DEPT_NAME AS deptName
+        si.tag_id,
+
+        si.professional_score,
+        si.communication_score,
+        si.teamwork_score,
+        si.emergency_score,
+        si.learning_score,
+
+        ti.name AS tagName
         FROM
         staff_info si
-        LEFT JOIN t_dept dept ON (dept.DEPT_ID = si.dept_id)
+        LEFT JOIN tag_info ti ON (ti.id = si.tag_id)
         WHERE
         1 = 1
         AND si.del_flag = 0
@@ -67,8 +81,8 @@
         <if test="queryForm.name != null and queryForm.name != ''">
             AND si.name like CONCAT("%",#{queryForm.name},"%")
         </if>
-        <if test="queryForm.deptName != null and queryForm.deptName != ''">
-            AND dept.DEPT_NAME like CONCAT("%",#{queryForm.deptName},"%")
+        <if test="queryForm.tagName != null and queryForm.tagName != ''">
+            AND ti.name like CONCAT("%",#{queryForm.tagName},"%")
         </if>
         ORDER BY
         si.create_date DESC

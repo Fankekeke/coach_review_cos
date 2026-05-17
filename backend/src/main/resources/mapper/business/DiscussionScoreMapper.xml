@@ -2,4 +2,49 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.DiscussionScoreMapper">
 
+    <!-- 分页获取讨论评分 -->
+    <select id="queryPage" resultType="java.util.LinkedHashMap">
+        select
+
+        ds.id,
+        ds.room_id,
+        ds.user_id,
+        ds.total_score,
+        ds.comment,
+        ds.scored_by,
+        ds.scored_time,
+        ds.professional_score,
+        ds.communication_score,
+        ds.teamwork_score,
+        ds.emergency_score,
+        ds.learning_score,
+
+        dr.room_name,
+        dr.topic,
+        dr.max_member_count,
+        dr.duration_minutes,
+        dr.current_member_count,
+        dr.start_time,
+        dr.end_time,
+
+        si.NAME AS staff_name,
+        si.staff_sex AS staff_sex,
+        si.images AS staff_images,
+        si.phone AS staff_phone,
+
+        from discussion_score ds
+        left join discussion_room dr on (dr.id = ds.room_id)
+        left join staff_info si on (si.id = ds.user_id)
+        where 1 = 1
+        <if test="queryForm.roomName != null and queryForm.roomName != ''">
+            AND dr.room_name like CONCAT("%",#{queryForm.roomName},"%")
+        </if>
+        <if test="queryForm.topic != null and queryForm.topic != ''">
+            AND dr.topic like CONCAT("%",#{queryForm.topic},"%")
+        </if>
+        <if test="queryFrom.staffName != null and queryForm.staffName != ''">
+            AND si.NAME like CONCAT("%",#{queryForm.staffName},"%")
+        </if>
+        order by ds.scored_time desc
+    </select>
 </mapper>
