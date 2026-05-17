@@ -25,6 +25,28 @@
                   placeholder="请输入题库标题"
                   size="large" />
               </a-form-item>
+              <a-form-item label='所属维度' v-bind="formItemLayout">
+                <a-select
+                  v-decorator="['dimension', { rules: [{ required: true, message: '请选择所属维度!' }] }]"
+                  placeholder="请选择所属维度"
+                  size="large">
+                  <a-select-option value="专业技能">专业技能</a-select-option>
+                  <a-select-option value="沟通能力">沟通能力</a-select-option>
+                  <a-select-option value="团队协作">团队协作</a-select-option>
+                  <a-select-option value="应急处理">应急处理</a-select-option>
+                  <a-select-option value="学习能力">学习能力</a-select-option>
+                </a-select>
+              </a-form-item>
+              <a-form-item label='所属方向' v-bind="formItemLayout">
+                <a-select
+                  v-decorator="['tagId', { rules: [{ required: true, message: '请选择所属方向!' }] }]"
+                  placeholder="请选择所属方向"
+                  size="large">
+                  <a-select-option v-for="tag in tagList" :key="tag.id" :value="tag.id">
+                    {{ tag.name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
 
               <a-divider style="margin: 16px 0" />
 
@@ -329,8 +351,12 @@ export default {
       return this.$createElement
     }
   },
+  mounted() {
+    this.queryTagList()
+  },
   data () {
     return {
+      tagList: [],
       submitLoading: false,
       activeKey: [], // 展开的面板 key
       formFix: {
@@ -379,7 +405,11 @@ export default {
     }
   },
   methods: {
-
+    queryTagList () {
+      this.$get('/business/tag-info/list').then((r) => {
+        this.tagList = r.data.data
+      })
+    },
     // 切换面板展开/折叠
     togglePanel (index) {
       const key = index.toString()

@@ -9,6 +9,7 @@
         qb.NAME,
         qb.image,
         qb.create_date,
+        qb.dimension,
 
         ti.name AS tagName,
 

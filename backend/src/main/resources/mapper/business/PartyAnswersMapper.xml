@@ -18,7 +18,7 @@
         FROM
         party_answers pa
         LEFT JOIN party_questions pq ON (pq.id = pa.question_id)
-        LEFT JOIN user_info ui ON (ui.id = pa.user_id)
+        LEFT JOIN staff_info ui ON (ui.id = pa.user_id)
         WHERE
         1 = 1
         <if test="queryFrom.userName != null and queryFrom.userName != ''">
@@ -50,7 +50,7 @@
         FROM
         party_answers pa
         LEFT JOIN party_questions pq ON (pq.id = pa.question_id)
-        LEFT JOIN user_info ui ON (ui.id = pa.user_id)
+        LEFT JOIN staff_info ui ON (ui.id = pa.user_id)
         WHERE
         1 = 1
         AND pa.question_id = #{questionId}

@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model="show" title="新增模块" @cancel="onClose" :width="450">
+  <a-modal v-model="show" title="新增方向" @cancel="onClose" :width="450">
     <template slot="footer">
       <a-button key="back" @click="onClose">
         取消
@@ -11,7 +11,7 @@
     <a-form :form="form" layout="vertical">
       <a-row :gutter="20">
         <a-col :span="24">
-          <a-form-item label='模块名称' v-bind="formItemLayout">
+          <a-form-item label='方向名称' v-bind="formItemLayout">
             <a-input v-decorator="[
             'name',
             { rules: [{ required: true, message: '请输入名称!' }] }
@@ -19,7 +19,7 @@
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label='模块状态' v-bind="formItemLayout">
+          <a-form-item label='方向状态' v-bind="formItemLayout">
             <a-switch default-checked @change="onChange">
               <a-icon slot="checkedChildren" type="check" />
               <a-icon slot="unCheckedChildren" type="close" />

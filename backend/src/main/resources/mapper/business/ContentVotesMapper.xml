@@ -16,7 +16,7 @@
         pa.content
         FROM
         content_votes cv
-        LEFT JOIN user_info ui ON (ui.id = cv.user_id)
+        LEFT JOIN staff_info ui ON (ui.id = cv.user_id)
         LEFT JOIN party_answers pa ON (pa.id = cv.answer_id)
         LEFT JOIN party_questions pq ON (pq.id = pa.question_id)
         WHERE

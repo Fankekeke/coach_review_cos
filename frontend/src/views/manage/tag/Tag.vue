@@ -7,7 +7,7 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="模块名称"
+                label="方向名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.name"/>
@@ -15,7 +15,7 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="模块状态"
+                label="方向状态"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-select v-model="queryParams.deleteFlag" allowClear>
@@ -131,10 +131,10 @@ export default {
     }),
     columns () {
       return [{
-        title: '模块ID',
+        title: '方向ID',
         dataIndex: 'id'
       }, {
-        title: '模块名称',
+        title: '方向名称',
         dataIndex: 'name'
       }, {
         title: '创建时间',
@@ -147,7 +147,7 @@ export default {
           }
         }
       }, {
-        title: '模块状态',
+        title: '方向状态',
         dataIndex: 'deleteFlag',
         customRender: (text, row, index) => {
           switch (text) {
@@ -184,7 +184,7 @@ export default {
     },
     handletagAddSuccess () {
       this.tagAdd.visiable = false
-      this.$message.success('新增模块成功')
+      this.$message.success('新增方向成功')
       this.search()
     },
     edit (record) {
@@ -196,7 +196,7 @@ export default {
     },
     handletagEditSuccess () {
       this.tagEdit.visiable = false
-      this.$message.success('修改模块成功')
+      this.$message.success('修改方向成功')
       this.search()
     },
     handleDeptChange (value) {

@@ -275,6 +275,16 @@ export default {
         scopedSlots: { customRender: 'name' },
         width: 250
       }, {
+        title: '所属方向',
+        dataIndex: 'tagName',
+        ellipsis: true,
+        width: 100
+      }, {
+        title: '维度',
+        dataIndex: 'dimension',
+        ellipsis: true,
+        width: 100
+      }, {
         title: '图册',
         dataIndex: 'image',
         ellipsis: true,

@@ -1,70 +1,64 @@
 <template>
-  <a-drawer
-    title="修改教练"
-    :maskClosable="false"
-    width=850
-    placement="right"
-    :closable="false"
-    @close="onClose"
-    :visible="moduleEditVisiable"
-    style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
+  <a-modal v-model="show" title="修改评估" @cancel="onClose" :width="800">
+    <template slot="footer">
+      <a-button key="back" @click="onClose">
+        取消
+      </a-button>
+      <a-button key="submit" type="primary" :loading="loading" @click="handleSubmit">
+        修改
+      </a-button>
+    </template>
     <a-form :form="form" layout="vertical">
-      <a-row :gutter="10">
+      <a-row :gutter="20">
         <a-col :span="12">
-          <a-form-item label='教练名称'>
+          <a-form-item label='评估标题' v-bind="formItemLayout">
             <a-input v-decorator="[
-            'name',
+            'title',
             { rules: [{ required: true, message: '请输入名称!' }] }
             ]"/>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label='性别' v-bind="formItemLayout">
+          <a-form-item label='上传人' v-bind="formItemLayout">
+            <a-input v-decorator="[
+            'publisher',
+            { rules: [{ required: true, message: '请输入上传人!' }] }
+            ]"/>
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label='评估类型' v-bind="formItemLayout">
             <a-select v-decorator="[
-              'staffSex',
-              { rules: [{ required: true, message: '请输入性别!' }] }
+              'type',
+              { rules: [{ required: true, message: '请输入评估类型!' }] }
               ]">
-              <a-select-option value="1">男</a-select-option>
-              <a-select-option value="2">女</a-select-option>
+              <a-select-option value="1">系统评估</a-select-option>
+              <a-select-option value="2">活动通知</a-select-option>
+              <a-select-option value="3">紧急消息</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label='出生日期'>
-            <a-date-picker
-              v-decorator="[
-                'birthDate',
-              ]"              style="width: 100%"
-              format="YYYY-MM-DD"
-              placeholder="请选择出生日期"
-            />
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='邮箱地址'>
-            <a-input v-decorator="[
-            'email',
-            { rules: [{ required: true, message: '请输邮箱地址!' }] }
-            ]"/>
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='联系方式'>
-            <a-input v-decorator="[
-            'phone',
-            { rules: [{ required: true, message: '请输入联系方式!' }] }
-            ]"/>
+          <a-form-item label='评估状态' v-bind="formItemLayout">
+            <a-select v-decorator="[
+              'rackUp',
+              { rules: [{ required: true, message: '请输入评估状态!' }] }
+              ]">
+              <a-select-option value="0">下架</a-select-option>
+              <a-select-option value="1">已发布</a-select-option>
+            </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label='备注内容' v-bind="formItemLayout">
+          <a-form-item label='评估内容' v-bind="formItemLayout">
             <a-textarea :rows="6" v-decorator="[
-            'content'
+            'content',
+             { rules: [{ required: true, message: '请输入名称!' }] }
             ]"/>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label='教练图片' v-bind="formItemLayout">
+          <a-form-item label='图册' v-bind="formItemLayout">
             <a-upload
               name="avatar"
               action="http://127.0.0.1:9527/file/fileUpload/"
@@ -74,34 +68,24 @@
               @change="picHandleChange"
             >
               <div v-if="fileList.length < 8">
-                <a-icon type="plus"/>
+                <a-icon type="plus" />
                 <div class="ant-upload-text">
                   Upload
                 </div>
               </div>
             </a-upload>
             <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-              <img alt="example" style="width: 100%" :src="previewImage"/>
+              <img alt="example" style="width: 100%" :src="previewImage" />
             </a-modal>
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
-
-    <div class="drawer-bootom-button">
-      <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
-        <a-button style="margin-right: .8rem">取消</a-button>
-      </a-popconfirm>
-      <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
-    </div>
-  </a-drawer>
+  </a-modal>
 </template>
 
 <script>
 import {mapState} from 'vuex'
-import moment from 'moment'
-moment.locale('zh-cn')
-
 function getBase64 (file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -110,15 +94,14 @@ function getBase64 (file) {
     reader.onerror = error => reject(error)
   })
 }
-
 const formItemLayout = {
-  labelCol: {span: 24},
-  wrapperCol: {span: 24}
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
 }
 export default {
-  name: 'moduleEdit',
+  name: 'BulletinEdit',
   props: {
-    moduleEditVisiable: {
+    bulletinEditVisiable: {
       default: false
     }
   },
@@ -128,7 +111,7 @@ export default {
     }),
     show: {
       get: function () {
-        return this.moduleEditVisiable
+        return this.bulletinEditVisiable
       },
       set: function () {
       }
@@ -146,7 +129,6 @@ export default {
     }
   },
   methods: {
-    moment,
     handleCancel () {
       this.previewVisible = false
     },
@@ -157,7 +139,7 @@ export default {
       this.previewImage = file.url || file.preview
       this.previewVisible = true
     },
-    picHandleChange ({fileList}) {
+    picHandleChange ({ fileList }) {
       this.fileList = fileList
     },
     imagesInit (images) {
@@ -169,24 +151,21 @@ export default {
         this.fileList = imageList
       }
     },
-    setFormValues ({...module}) {
-      this.rowId = module.id
-      let fields = ['name', 'staffSex', 'birthDate', 'content', 'email', 'phone']
+    setFormValues ({...bulletin}) {
+      this.rowId = bulletin.id
+      let fields = ['title', 'content', 'publisher', 'rackUp', 'type']
       let obj = {}
-      Object.keys(module).forEach((key) => {
+      Object.keys(bulletin).forEach((key) => {
         if (key === 'images') {
           this.fileList = []
-          this.imagesInit(module['images'])
+          this.imagesInit(bulletin['images'])
         }
-        if (key === 'staffSex' && module[key] !== null) {
-          module[key] = module[key].toString()
-        }
-        if (key === 'birthDate' && module[key] !== null) {
-          module[key] = moment(module[key], 'YYYY-MM-DD')
+        if (key === 'rackUp' || key === 'type') {
+          bulletin[key] = bulletin[key].toString()
         }
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)
-          obj[key] = module[key]
+          obj[key] = bulletin[key]
         }
       })
       this.form.setFieldsValue(obj)
@@ -212,12 +191,9 @@ export default {
       this.form.validateFields((err, values) => {
         values.id = this.rowId
         values.images = images.length > 0 ? images.join(',') : null
-        if (values.birthDate) {
-          values.birthDate = values.birthDate.format('YYYY-MM-DD')
-        }
         if (!err) {
           this.loading = true
-          this.$put('/business/staff-info', {
+          this.$put('/business/assessment-submission', {
             ...values
           }).then((r) => {
             this.reset()

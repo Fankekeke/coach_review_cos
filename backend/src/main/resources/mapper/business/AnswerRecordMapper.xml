@@ -17,7 +17,7 @@
         qb.name AS bankName,
         qb.image AS bankImage
         from answer_record ar
-        left join user_info ui on (ui.id = ar.user_id)
+        left join staff_info ui on (ui.id = ar.user_id)
         left join question_bank qb on (qb.id = ar.bank_id)
         where 1 = 1
         <if test="queryFrom.userName != null and queryFrom.userName != ''">

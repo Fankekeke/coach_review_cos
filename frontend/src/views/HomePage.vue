@@ -31,7 +31,7 @@
 <!--                <head-info title="供应商数量" :content="titleData.pharmacyNum" :center="false" :bordered="false"/>-->
 <!--              </a-col>-->
 <!--              <a-col :span="4">-->
-<!--                <head-info title="教师数量" :content="titleData.staffNum" :center="false"/>-->
+<!--                <head-info title="教练数量" :content="titleData.staffNum" :center="false"/>-->
 <!--              </a-col>-->
 <!--            </a-row>-->
           </div>

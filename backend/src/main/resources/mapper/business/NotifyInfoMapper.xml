@@ -16,7 +16,7 @@
         ui.images as userImages
         from
         notify_info ni
-        left join user_info ui on
+        left join staff_info ui on
         (ui.code = ni.user_code)
         where
         1 = 1

@@ -1,74 +1,64 @@
 <template>
-  <a-drawer
-    title="新增教练"
-    :maskClosable="false"
-    width=850
-    placement="right"
-    :closable="false"
-    @close="onClose"
-    :visible="moduleAddVisiable"
-    style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
+  <a-modal v-model="show" title="新增评估" @cancel="onClose" :width="800">
+    <template slot="footer">
+      <a-button key="back" @click="onClose">
+        取消
+      </a-button>
+      <a-button key="submit" type="primary" :loading="loading" @click="handleSubmit">
+        提交
+      </a-button>
+    </template>
     <a-form :form="form" layout="vertical">
-      <a-row :gutter="10">
+      <a-row :gutter="20">
         <a-col :span="12">
-          <a-form-item label='教练名称'>
+          <a-form-item label='评估标题' v-bind="formItemLayout">
             <a-input v-decorator="[
-            'name',
+            'title',
             { rules: [{ required: true, message: '请输入名称!' }] }
             ]"/>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label='性别' v-bind="formItemLayout">
+          <a-form-item label='上传人' v-bind="formItemLayout">
+            <a-input v-decorator="[
+            'publisher',
+            { rules: [{ required: true, message: '请输入上传人!' }] }
+            ]"/>
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label='评估类型' v-bind="formItemLayout">
             <a-select v-decorator="[
-              'staffSex',
-              { rules: [{ required: true, message: '请输入性别!' }] }
+              'type',
+              { rules: [{ required: true, message: '请输入评估类型!' }] }
               ]">
-              <a-select-option value="1">男</a-select-option>
-              <a-select-option value="2">女</a-select-option>
+              <a-select-option value="1">系统评估</a-select-option>
+              <a-select-option value="2">活动通知</a-select-option>
+              <a-select-option value="3">紧急消息</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label='出生日期'>
-            <a-input v-decorator="[
-            'birthDate',
-            ]"/>
+          <a-form-item label='评估状态' v-bind="formItemLayout">
+            <a-select v-decorator="[
+              'rackUp',
+              { rules: [{ required: true, message: '请输入评估状态!' }] }
+              ]">
+              <a-select-option value="0">下架</a-select-option>
+              <a-select-option value="1">已发布</a-select-option>
+            </a-select>
           </a-form-item>
         </a-col>
-        <a-col :span="12">
-          <a-form-item label='邮箱地址'>
-            <a-input v-decorator="[
-            'email',
-            { rules: [{ required: true, message: '请输邮箱地址!' }] }
-            ]"/>
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='联系方式'>
-            <a-input v-decorator="[
-            'phone',
-            { rules: [{ required: true, message: '请输入联系方式!' }] }
-            ]"/>
-          </a-form-item>
-        </a-col>
-<!--        <a-col :span="12">-->
-<!--          <a-form-item label='所属部门'>-->
-<!--            <a-input v-decorator="[-->
-<!--            'deptId',-->
-<!--            { rules: [{ required: true, message: '请输入所属部门!' }] }-->
-<!--            ]"/>-->
-<!--          </a-form-item>-->
-<!--        </a-col>-->
         <a-col :span="24">
-          <a-form-item label='备注内容' v-bind="formItemLayout">
+          <a-form-item label='评估内容' v-bind="formItemLayout">
             <a-textarea :rows="6" v-decorator="[
-            'content'
+            'content',
+             { rules: [{ required: true, message: '请输入名称!' }] }
             ]"/>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label='教练图片' v-bind="formItemLayout">
+          <a-form-item label='图册' v-bind="formItemLayout">
             <a-upload
               name="avatar"
               action="http://127.0.0.1:9527/file/fileUpload/"
@@ -78,32 +68,24 @@
               @change="picHandleChange"
             >
               <div v-if="fileList.length < 8">
-                <a-icon type="plus"/>
+                <a-icon type="plus" />
                 <div class="ant-upload-text">
                   Upload
                 </div>
               </div>
             </a-upload>
             <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-              <img alt="example" style="width: 100%" :src="previewImage"/>
+              <img alt="example" style="width: 100%" :src="previewImage" />
             </a-modal>
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
-
-    <div class="drawer-bootom-button">
-      <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
-        <a-button style="margin-right: .8rem">取消</a-button>
-      </a-popconfirm>
-      <a-button @click="handleSubmit" type="primary" :loading="loading">提交</a-button>
-    </div>
-  </a-drawer>
+  </a-modal>
 </template>
 
 <script>
 import {mapState} from 'vuex'
-
 function getBase64 (file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -112,15 +94,14 @@ function getBase64 (file) {
     reader.onerror = error => reject(error)
   })
 }
-
 const formItemLayout = {
-  labelCol: {span: 24},
-  wrapperCol: {span: 24}
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
 }
 export default {
-  name: 'moduleAdd',
+  name: 'BulletinAdd',
   props: {
-    moduleAddVisiable: {
+    bulletinAddVisiable: {
       default: false
     }
   },
@@ -130,7 +111,7 @@ export default {
     }),
     show: {
       get: function () {
-        return this.moduleAddVisiable
+        return this.bulletinAddVisiable
       },
       set: function () {
       }
@@ -157,7 +138,7 @@ export default {
       this.previewImage = file.url || file.preview
       this.previewVisible = true
     },
-    picHandleChange ({fileList}) {
+    picHandleChange ({ fileList }) {
       this.fileList = fileList
     },
     reset () {
@@ -178,7 +159,7 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
-          this.$post('/business/staff-info', {
+          this.$post('/business/assessment-submission', {
             ...values
           }).then((r) => {
             this.reset()

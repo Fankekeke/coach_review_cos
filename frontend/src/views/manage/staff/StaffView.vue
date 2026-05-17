@@ -1,11 +1,87 @@
 <template>
-  <a-modal v-model="show" title="教师详情" @cancel="onClose" :width="800">
+  <a-modal v-model="show" title="教练详情" @cancel="onClose" :width="800">
     <template slot="footer">
-      <a-button key="back" @click="onClose" type="danger">
+      <a-button key="back" @click="onClose" type="primary">
         关闭
       </a-button>
     </template>
-    <div style="font-size: 13px;font-family: SimHei" v-if="moduleData !== null"></div>
+    <div style="font-size: 13px;font-family: SimHei" v-if="moduleData !== null">
+      <a-descriptions bordered :column="2">
+        <a-descriptions-item label="教练编号">
+          {{ moduleData.code }}
+        </a-descriptions-item>
+        <a-descriptions-item label="教练名称">
+          {{ moduleData.name }}
+        </a-descriptions-item>
+        <a-descriptions-item label="性别">
+          {{ moduleData.staffSex === 1 ? '男' : moduleData.staffSex === 2 ? '女' : '-' }}
+        </a-descriptions-item>
+        <a-descriptions-item label="出生日期">
+          {{ moduleData.birthDate || '-' }}
+        </a-descriptions-item>
+        <a-descriptions-item label="邮箱地址">
+          {{ moduleData.email || '-' }}
+        </a-descriptions-item>
+        <a-descriptions-item label="联系方式">
+          {{ moduleData.phone || '-' }}
+        </a-descriptions-item>
+        <a-descriptions-item label="创建日期">
+          {{ moduleData.createDate || '-' }}
+        </a-descriptions-item>
+        <a-descriptions-item label="方向">
+          {{ moduleData.tagName || '-' }}
+        </a-descriptions-item>
+        <a-descriptions-item label="备注" :span="2">
+          {{ moduleData.content || '-' }}
+        </a-descriptions-item>
+      </a-descriptions>
+
+      <a-divider>教练评分</a-divider>
+
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-card size="small" title="专业素养" style="margin-bottom: 16px">
+            <div style="text-align: center; font-size: 24px; font-weight: bold; color: #1890ff">
+              {{ moduleData.professionalScore || '-' }}
+            </div>
+          </a-card>
+        </a-col>
+        <a-col :span="12">
+          <a-card size="small" title="沟通能力" style="margin-bottom: 16px">
+            <div style="text-align: center; font-size: 24px; font-weight: bold; color: #52c41a">
+              {{ moduleData.communicationScore || '-' }}
+            </div>
+          </a-card>
+        </a-col>
+      </a-row>
+
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-card size="small" title="团队协作" style="margin-bottom: 16px">
+            <div style="text-align: center; font-size: 24px; font-weight: bold; color: #faad14">
+              {{ moduleData.teamworkScore || '-' }}
+            </div>
+          </a-card>
+        </a-col>
+        <a-col :span="12">
+          <a-card size="small" title="应急处理" style="margin-bottom: 16px">
+            <div style="text-align: center; font-size: 24px; font-weight: bold; color: #f5222d">
+              {{ moduleData.emergencyScore || '-' }}
+            </div>
+          </a-card>
+        </a-col>
+      </a-row>
+
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-card size="small" title="学习能力">
+            <div style="text-align: center; font-size: 24px; font-weight: bold; color: #722ed1">
+              {{ moduleData.learningScore || '-' }}
+            </div>
+          </a-card>
+        </a-col>
+      </a-row>
+    </div>
   </a-modal>
 </template>
 
@@ -54,9 +130,13 @@ export default {
   watch: {
     moduleShow: function (value) {
       if (value) {
-        if (this.moduleData.materialsImages !== null && this.moduleData.materialsImages !== '') {
-          this.imagesInit(this.moduleData.materialsImages)
+        this.fileList = []
+        if (this.moduleData.images) {
+          this.imagesInit(this.moduleData.images)
         }
+      } else {
+        this.fileList = []
+        this.previewVisible = false
       }
     }
   },

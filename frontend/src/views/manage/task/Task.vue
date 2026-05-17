@@ -7,28 +7,20 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="教练名称"
+                label="标题"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
+                <a-input v-model="queryParams.title"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="教练编号"
+                label="内容"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.code"/>
+                <a-input v-model="queryParams.content"/>
               </a-form-item>
             </a-col>
-<!--            <a-col :md="6" :sm="24">-->
-<!--              <a-form-item-->
-<!--                label="所属部门"-->
-<!--                :labelCol="{span: 5}"-->
-<!--                :wrapperCol="{span: 18, offset: 1}">-->
-<!--                <a-input v-model="queryParams.deptName"/>-->
-<!--              </a-form-item>-->
-<!--            </a-col>-->
           </div>
           <span style="float: right; margin-top: 3px;">
             <a-button type="primary" @click="search">查询</a-button>
@@ -39,8 +31,9 @@
     </div>
     <div>
       <div class="operator">
-<!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
+        <a-button type="primary" ghost @click="add">新增</a-button>
         <a-button @click="batchDelete">删除</a-button>
+<!--        <a-button @click="batchDelete1">删除</a-button>-->
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -52,57 +45,67 @@
                :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                :scroll="{ x: 900 }"
                @change="handleTableChange">
+        <template slot="titleShow" slot-scope="text, record">
+          <template>
+            <a-badge status="processing" v-if="record.rackUp === 1"/>
+            <a-badge status="error" v-if="record.rackUp === 0"/>
+            <a-tooltip>
+              <template slot="title">
+                {{ record.title }}
+              </template>
+              {{ record.title.slice(0, 8) }} ...
+            </a-tooltip>
+          </template>
+        </template>
+        <template slot="contentShow" slot-scope="text, record">
+          <template>
+            <a-tooltip>
+              <template slot="title">
+                {{ record.content }}
+              </template>
+              {{ record.content.slice(0, 30) }} ...
+            </a-tooltip>
+          </template>
+        </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="cloud" @click="handleModuleViewOpen(record)" title="详 情"></a-icon>
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"
-                  style="margin-left: 15px"></a-icon>
+          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
         </template>
       </a-table>
     </div>
-    <module-add
-      @close="handleModuleAddClose"
-      @success="handleModuleAddSuccess"
-      :moduleAddVisiable="moduleAdd.visiable">
-    </module-add>
-    <module-edit
-      ref="moduleEdit"
-      @close="handleModuleEditClose"
-      @success="handleModuleEditSuccess"
-      :moduleEditVisiable="moduleEdit.visiable">
-    </module-edit>
-    <module-view
-      @close="handleModuleViewClose"
-      :moduleShow="moduleView.visiable"
-      :moduleData="moduleView.data">
-    </module-view>
+    <bulletin-add
+      v-if="bulletinAdd.visiable"
+      @close="handleBulletinAddClose"
+      @success="handleBulletinAddSuccess"
+      :bulletinAddVisiable="bulletinAdd.visiable">
+    </bulletin-add>
+    <bulletin-edit
+      ref="bulletinEdit"
+      @close="handleBulletinEditClose"
+      @success="handleBulletinEditSuccess"
+      :bulletinEditVisiable="bulletinEdit.visiable">
+    </bulletin-edit>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
-import moduleAdd from './StaffAdd.vue'
-import moduleEdit from './StaffEdit.vue'
-import moduleView from './StaffView.vue'
+import BulletinAdd from './TaskAdd.vue'
+import BulletinEdit from './TaskEdit.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
-
 moment.locale('zh-cn')
 
 export default {
-  name: 'module',
-  components: {moduleAdd, moduleEdit, moduleView, RangeDate},
+  name: 'Bulletin',
+  components: {BulletinAdd, BulletinEdit, RangeDate},
   data () {
     return {
       advanced: false,
-      moduleAdd: {
+      bulletinAdd: {
         visiable: false
       },
-      moduleEdit: {
+      bulletinEdit: {
         visiable: false
-      },
-      moduleView: {
-        visiable: false,
-        data: null
       },
       queryParams: {},
       filteredInfo: null,
@@ -128,70 +131,15 @@ export default {
     }),
     columns () {
       return [{
-        title: '教练编号',
-        dataIndex: 'code',
+        title: '标题',
+        dataIndex: 'title',
         ellipsis: true
       }, {
-        title: '教练名称',
-        dataIndex: 'name',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
+        title: '评估任务内容',
+        dataIndex: 'content',
+        ellipsis: true
       }, {
-        title: '头像',
-        dataIndex: 'images',
-        customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
-          return <a-popover>
-            <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images } />
-            </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images } />
-          </a-popover>
-        }
-      }, {
-        title: '性别',
-        dataIndex: 'staffSex',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          switch (text) {
-            case 1:
-              return <a-tag>男</a-tag>
-            case 2:
-              return <a-tag>女</a-tag>
-            default:
-              return '- -'
-          }
-        }
-      }, {
-        title: '出生日期',
-        dataIndex: 'birthDate',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '联系方式',
-        dataIndex: 'phone',
-        ellipsis: true,
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '创建时间',
+        title: '发布时间',
         dataIndex: 'createDate',
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -199,7 +147,34 @@ export default {
           } else {
             return '- -'
           }
+        },
+        ellipsis: true
+      }, {
+        title: '消息类型',
+        dataIndex: 'type',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case 1:
+              return <a-tag>系统评估任务</a-tag>
+            case 2:
+              return <a-tag>活动通知</a-tag>
+            case 3:
+              return <a-tag>紧急消息</a-tag>
+            default:
+              return '- -'
+          }
         }
+      }, {
+        title: '上传人',
+        dataIndex: 'publisher',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -211,13 +186,6 @@ export default {
     this.fetch()
   },
   methods: {
-    handleModuleViewOpen (row) {
-      this.moduleView.data = row
-      this.moduleView.visiable = true
-    },
-    handleModuleViewClose () {
-      this.moduleView.visiable = false
-    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -225,27 +193,34 @@ export default {
       this.advanced = !this.advanced
     },
     add () {
-      this.moduleAdd.visiable = true
+      this.bulletinAdd.visiable = true
     },
-    handleModuleAddClose () {
-      this.moduleAdd.visiable = false
+    handleBulletinAddClose () {
+      this.bulletinAdd.visiable = false
     },
-    handleModuleAddSuccess () {
-      this.moduleAdd.visiable = false
-      this.$message.success('新增教练成功')
+    handleBulletinAddSuccess () {
+      this.bulletinAdd.visiable = false
+      this.$message.success('新增评估任务成功')
       this.search()
     },
     edit (record) {
-      this.$refs.moduleEdit.setFormValues(record)
-      this.moduleEdit.visiable = true
+      this.$refs.bulletinEdit.setFormValues(record)
+      this.bulletinEdit.visiable = true
     },
-    handleModuleEditClose () {
-      this.moduleEdit.visiable = false
+    handleBulletinEditClose () {
+      this.bulletinEdit.visiable = false
     },
-    handleModuleEditSuccess () {
-      this.moduleEdit.visiable = false
-      this.$message.success('修改教练成功')
+    handleBulletinEditSuccess () {
+      this.bulletinEdit.visiable = false
+      this.$message.success('修改评估任务成功')
       this.search()
+    },
+    handleDeptChange (value) {
+      this.queryParams.deptId = value || ''
+    },
+    batchDelete1 () {
+      this.$get('/business/supplier-info/batchEditSupplierName').then((r) => {
+      })
     },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
@@ -259,7 +234,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/business/staff-info/' + ids).then(() => {
+          that.$delete('/business/assessment-task/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -329,10 +304,7 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.status === undefined) {
-        delete params.status
-      }
-      this.$get('/business/staff-info/page', {
+      this.$get('/business/assessment-task/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

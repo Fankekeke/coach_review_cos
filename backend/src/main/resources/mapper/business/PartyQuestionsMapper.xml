@@ -15,7 +15,7 @@
         COUNT(pa.id) AS answerCount
         FROM
         party_questions pq
-        LEFT JOIN user_info ui ON (ui.id = pq.user_id)
+        LEFT JOIN staff_info ui ON (ui.id = pq.user_id)
         LEFT JOIN party_answers pa ON (pa.question_id = pq.id)
         WHERE
         1 = 1
@@ -47,7 +47,7 @@
         COUNT(pa.id) AS answerCount
         FROM
         party_questions pq
-        LEFT JOIN user_info ui ON (ui.id = pq.user_id)
+        LEFT JOIN staff_info ui ON (ui.id = pq.user_id)
         LEFT JOIN party_answers pa ON (pa.question_id = pq.id)
         WHERE
         1 = 1
