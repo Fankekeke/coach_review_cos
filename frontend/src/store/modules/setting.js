@@ -12,7 +12,7 @@ export default {
     isMobile: false,
     theme: db.get('THEME', 'light'),
     layout: db.get('LAYOUT', 'side'),
-    systemName: '英语单词学习进度系统',
+    systemName: '教练在线考核平台',
     copyright: `${new Date().getFullYear()} <a href="https://berserker287.github.io" target="_blank">FanK</a>`,
     multipage: getBooleanValue(db.get('MULTIPAGE'), true),
     fixSiderbar: getBooleanValue(db.get('FIX_SIDERBAR'), true),
