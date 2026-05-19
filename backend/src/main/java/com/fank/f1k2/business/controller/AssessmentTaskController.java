@@ -2,6 +2,9 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.AssessmentTask;
@@ -26,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssessmentTaskController {
 
     private final IAssessmentTaskService bulletinInfoService;
+
+    private final IStaffInfoService staffInfoService;
 
     /**
      * 分页获取自我评估任务表
@@ -68,6 +73,7 @@ public class AssessmentTaskController {
      */
     @PostMapping
     public R save(AssessmentTask addFrom) {
+        addFrom.setCreateTime(DateUtil.formatDateTime(new Date()));
         return R.ok(bulletinInfoService.save(addFrom));
     }
 

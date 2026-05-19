@@ -11,49 +11,50 @@
     <a-form :form="form" layout="vertical">
       <a-row :gutter="20">
         <a-col :span="12">
-          <a-form-item label='房间标题' v-bind="formItemLayout">
+          <a-form-item label='房间名称' v-bind="formItemLayout">
             <a-input v-decorator="[
-            'title',
-            { rules: [{ required: true, message: '请输入名称!' }] }
+            'roomName',
+            { rules: [{ required: true, message: '请输入房间名称!' }] }
             ]"/>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label='上传人' v-bind="formItemLayout">
-            <a-input v-decorator="[
-            'publisher',
-            { rules: [{ required: true, message: '请输入上传人!' }] }
-            ]"/>
+          <a-form-item label='最大人数' v-bind="formItemLayout">
+            <a-input-number
+              v-decorator="[
+                'maxMemberCount',
+                { rules: [{ required: true, message: '请输入最大人数!' }] }
+              ]"
+              :min="1"              style="width: 100%"
+            />
           </a-form-item>
         </a-col>
+        <a-form-item label='讨论时长(分钟)' v-bind="formItemLayout">
+          <a-input-number
+            v-decorator="[
+                'durationMinutes',
+                { rules: [{ required: true, message: '请输入讨论时长!' }] }
+              ]"
+            :min="5"
+            :max="60"              style="width: 100%"
+          />
+        </a-form-item>
         <a-col :span="12">
-          <a-form-item label='房间类型' v-bind="formItemLayout">
+          <a-form-item label='是否自动开始' v-bind="formItemLayout">
             <a-select v-decorator="[
-              'type',
-              { rules: [{ required: true, message: '请输入房间类型!' }] }
+              'autoStart',
+              { rules: [{ required: true, message: '请选择是否自动开始!' }] }
               ]">
-              <a-select-option value="1">系统房间</a-select-option>
-              <a-select-option value="2">活动通知</a-select-option>
-              <a-select-option value="3">紧急消息</a-select-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='房间状态' v-bind="formItemLayout">
-            <a-select v-decorator="[
-              'rackUp',
-              { rules: [{ required: true, message: '请输入房间状态!' }] }
-              ]">
-              <a-select-option value="0">下架</a-select-option>
-              <a-select-option value="1">已发布</a-select-option>
+              <a-select-option :value="0">否</a-select-option>
+              <a-select-option :value="1">是</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label='房间内容' v-bind="formItemLayout">
+          <a-form-item label='讨论主题' v-bind="formItemLayout">
             <a-textarea :rows="6" v-decorator="[
-            'content',
-             { rules: [{ required: true, message: '请输入名称!' }] }
+            'topic',
+             { rules: [{ required: true, message: '请输入讨论主题!' }] }
             ]"/>
           </a-form-item>
         </a-col>
@@ -153,7 +154,7 @@ export default {
     },
     setFormValues ({...bulletin}) {
       this.rowId = bulletin.id
-      let fields = ['title', 'content', 'publisher', 'rackUp', 'type']
+      let fields = ['roomName', 'topic', 'roomStatus', 'maxMemberCount', 'durationMinutes', 'autoStart']
       let obj = {}
       Object.keys(bulletin).forEach((key) => {
         if (key === 'images') {

@@ -7,18 +7,30 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="标题"
+                label="房间名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.title"/>
+                <a-input v-model="queryParams.roomName"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="内容"
+                label="讨论主题"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.content"/>
+                <a-input v-model="queryParams.topic"/>
+              </a-form-item>
+            </a-col>
+            <a-col :md="6" :sm="24">
+              <a-form-item
+                label="状态"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select v-model="queryParams.roomStatus" allowClear placeholder="请选择状态">
+                  <a-select-option value="0">未开始</a-select-option>
+                  <a-select-option value="1">进行中</a-select-option>
+                  <a-select-option value="2">已结束</a-select-option>
+                </a-select>
               </a-form-item>
             </a-col>
           </div>
@@ -33,7 +45,6 @@
       <div class="operator">
         <a-button type="primary" ghost @click="add">新增</a-button>
         <a-button @click="batchDelete">删除</a-button>
-<!--        <a-button @click="batchDelete1">删除</a-button>-->
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -131,44 +142,80 @@ export default {
     }),
     columns () {
       return [{
-        title: '标题',
-        dataIndex: 'title',
+        title: '房间名称',
+        dataIndex: 'roomName',
         ellipsis: true
       }, {
-        title: '房间内容',
-        dataIndex: 'content',
+        title: '讨论主题',
+        dataIndex: 'topic',
         ellipsis: true
       }, {
-        title: '发布时间',
-        dataIndex: 'createDate',
+        title: '状态',
+        dataIndex: 'roomStatus',
         customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
+          switch (text) {
+            case 0:
+              return <a-tag>未开始</a-tag>
+            case 1:
+              return <a-tag color="green">进行中</a-tag>
+            case 2:
+              return <a-tag color="red">已结束</a-tag>
+            default:
+              return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '最大人数',
+        dataIndex: 'maxMemberCount',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
+            return text + '人'
           } else {
             return '- -'
           }
         },
         ellipsis: true
       }, {
-        title: '消息类型',
-        dataIndex: 'type',
+        title: '当前人数',
+        dataIndex: 'currentMemberCount',
         customRender: (text, row, index) => {
-          switch (text) {
-            case 1:
-              return <a-tag>系统房间</a-tag>
-            case 2:
-              return <a-tag>活动通知</a-tag>
-            case 3:
-              return <a-tag>紧急消息</a-tag>
-            default:
-              return '- -'
+          if (text !== null && text !== undefined) {
+            return text + '人'
+          } else {
+            return '- -'
           }
-        }
+        },
+        ellipsis: true
       }, {
-        title: '上传人',
-        dataIndex: 'publisher',
+        title: '讨论时长',
+        dataIndex: 'durationMinutes',
         customRender: (text, row, index) => {
-          if (text !== null) {
+          if (text !== null && text !== undefined) {
+            return text + '分钟'
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '自动开始',
+        dataIndex: 'autoStart',
+        customRender: (text, row, index) => {
+          if (text === 1 || text === true) {
+            return <a-tag color="green">是</a-tag>
+          } else if (text === 0 || text === false) {
+            return <a-tag>否</a-tag>
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '创建时间',
+        dataIndex: 'createTime',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
             return text
           } else {
             return '- -'
@@ -178,7 +225,8 @@ export default {
       }, {
         title: '操作',
         dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'}
+        scopedSlots: {customRender: 'operation'},
+        ellipsis: true
       }]
     }
   },
@@ -217,10 +265,6 @@ export default {
     },
     handleDeptChange (value) {
       this.queryParams.deptId = value || ''
-    },
-    batchDelete1 () {
-      this.$get('/business/supplier-info/batchEditSupplierName').then((r) => {
-      })
     },
     batchDelete () {
       if (!this.selectedRowKeys.length) {

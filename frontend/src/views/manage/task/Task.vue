@@ -7,18 +7,29 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="标题"
+                label="任务名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.title"/>
+                <a-input v-model="queryParams.taskName"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="内容"
+                label="所属方向"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.content"/>
+                <a-input v-model="queryParams.tagName"/>
+              </a-form-item>
+            </a-col>
+            <a-col :md="6" :sm="24">
+              <a-form-item
+                label="任务类型"
+                :labelCol="{span: 5}"
+                :wrapperCol="{span: 18, offset: 1}">
+                <a-select v-model="queryParams.taskType" allowClear placeholder="请选择任务类型">
+                  <a-select-option :value="1">视频</a-select-option>
+                  <a-select-option :value="2">文档</a-select-option>
+                </a-select>
               </a-form-item>
             </a-col>
           </div>
@@ -131,18 +142,44 @@ export default {
     }),
     columns () {
       return [{
-        title: '标题',
-        dataIndex: 'title',
+        title: '任务名称',
+        dataIndex: 'taskName',
         ellipsis: true
       }, {
-        title: '评估任务内容',
-        dataIndex: 'content',
-        ellipsis: true
-      }, {
-        title: '发布时间',
-        dataIndex: 'createDate',
+        title: '任务类型',
+        dataIndex: 'taskType',
         customRender: (text, row, index) => {
-          if (text !== null) {
+          switch (text) {
+            case 1:
+              return <a-tag>视频</a-tag>
+            case 2:
+              return <a-tag>文档</a-tag>
+            default:
+              return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '任务维度',
+        dataIndex: 'taskDimension',
+        ellipsis: true
+      }, {
+        title: '所属方向',
+        dataIndex: 'tagName',
+        ellipsis: true
+      }, {
+        title: '任务描述',
+        dataIndex: 'taskDescription',
+        ellipsis: true
+      }, {
+        title: '评分标准',
+        dataIndex: 'scoringStandard',
+        ellipsis: true
+      }, {
+        title: '截止时间',
+        dataIndex: 'deadline',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
             return text
           } else {
             return '- -'
@@ -150,25 +187,24 @@ export default {
         },
         ellipsis: true
       }, {
-        title: '消息类型',
-        dataIndex: 'type',
+        title: '状态',
+        dataIndex: 'status',
         customRender: (text, row, index) => {
           switch (text) {
+            case 0:
+              return <a-tag>关闭</a-tag>
             case 1:
-              return <a-tag>系统评估任务</a-tag>
-            case 2:
-              return <a-tag>活动通知</a-tag>
-            case 3:
-              return <a-tag>紧急消息</a-tag>
+              return <a-tag color="green">进行中</a-tag>
             default:
               return '- -'
           }
-        }
+        },
+        ellipsis: true
       }, {
-        title: '上传人',
-        dataIndex: 'publisher',
+        title: '创建时间',
+        dataIndex: 'createTime',
         customRender: (text, row, index) => {
-          if (text !== null) {
+          if (text !== null && text !== undefined) {
             return text
           } else {
             return '- -'
@@ -178,7 +214,8 @@ export default {
       }, {
         title: '操作',
         dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'}
+        scopedSlots: {customRender: 'operation'},
+        ellipsis: true
       }]
     }
   },

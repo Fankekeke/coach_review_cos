@@ -40,7 +40,7 @@ public class AssessmentTask implements Serializable {
     private Integer taskType;
 
     /**
-     * 任务维度
+     * 任务维度（专业技能、沟通能力、团队协作、应急处理、学习能力）
      */
     private String taskDimension;
 
@@ -75,6 +75,9 @@ public class AssessmentTask implements Serializable {
 
     private String updateTime;
 
+    /**
+     * 方向ID
+     */
     private Integer tagId;
 
     @TableField(exist = false)

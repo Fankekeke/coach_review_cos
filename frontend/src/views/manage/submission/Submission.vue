@@ -131,18 +131,22 @@ export default {
     }),
     columns () {
       return [{
-        title: '标题',
-        dataIndex: 'title',
+        title: '任务名称',
+        dataIndex: 'taskName',
         ellipsis: true
       }, {
-        title: '评估内容',
-        dataIndex: 'content',
+        title: '所属方向',
+        dataIndex: 'tagName',
         ellipsis: true
       }, {
-        title: '发布时间',
-        dataIndex: 'createDate',
+        title: '教练姓名',
+        dataIndex: 'staffName',
+        ellipsis: true
+      }, {
+        title: '性别',
+        dataIndex: 'staffSex',
         customRender: (text, row, index) => {
-          if (text !== null) {
+          if (text !== null && text !== undefined) {
             return text
           } else {
             return '- -'
@@ -150,25 +154,59 @@ export default {
         },
         ellipsis: true
       }, {
-        title: '消息类型',
-        dataIndex: 'type',
+        title: '提交状态',
+        dataIndex: 'submissionStatus',
         customRender: (text, row, index) => {
           switch (text) {
+            case 0:
+              return <a-tag>未提交</a-tag>
             case 1:
-              return <a-tag>系统评估</a-tag>
+              return <a-tag color="orange">待评</a-tag>
             case 2:
-              return <a-tag>活动通知</a-tag>
-            case 3:
-              return <a-tag>紧急消息</a-tag>
+              return <a-tag color="green">已评</a-tag>
             default:
               return '- -'
           }
-        }
+        },
+        ellipsis: true
       }, {
-        title: '上传人',
-        dataIndex: 'publisher',
+        title: '最终得分',
+        dataIndex: 'finalScore',
         customRender: (text, row, index) => {
-          if (text !== null) {
+          if (text !== null && text !== undefined) {
+            return text + '分'
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '评语',
+        dataIndex: 'teacherComment',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
+            return text
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '提交时间',
+        dataIndex: 'submitTime',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
+            return text
+          } else {
+            return '- -'
+          }
+        },
+        ellipsis: true
+      }, {
+        title: '审核时间',
+        dataIndex: 'reviewedTime',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
             return text
           } else {
             return '- -'
@@ -178,7 +216,8 @@ export default {
       }, {
         title: '操作',
         dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'}
+        scopedSlots: {customRender: 'operation'},
+        ellipsis: true
       }]
     }
   },

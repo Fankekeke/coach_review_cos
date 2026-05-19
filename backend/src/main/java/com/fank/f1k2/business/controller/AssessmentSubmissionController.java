@@ -2,6 +2,10 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
+import com.fank.f1k2.business.service.IUserAbilityScoreService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.AssessmentSubmission;
@@ -26,6 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssessmentSubmissionController {
 
     private final IAssessmentSubmissionService bulletinInfoService;
+
+    private final IStaffInfoService staffInfoService;
+
+    private final IUserAbilityScoreService userAbilityScoreService;
 
     /**
      * 分页获取评估任务提交表
@@ -68,7 +76,26 @@ public class AssessmentSubmissionController {
      */
     @PostMapping
     public R save(AssessmentSubmission addFrom) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, addFrom.getUserId()));
+        addFrom.setUserId(staffInfo.getId());
+        addFrom.setCreateTime(DateUtil.formatDateTime(new Date()));
+        if (addFrom.getSubmissionStatus() == 1) {
+            addFrom.setSubmitTime(DateUtil.formatDateTime(new Date()));
+        }
         return R.ok(bulletinInfoService.save(addFrom));
+    }
+
+    /**
+     * 审核评分
+     *
+     * @param editFrom 评估任务提交表对象
+     * @return 结果
+     */
+    @PutMapping("/auditScore")
+    public R auditScore(AssessmentSubmission editFrom) {
+        editFrom.setSubmissionStatus(2);
+        editFrom.setReviewedTime(DateUtil.formatDateTime(new Date()));
+        return R.ok(bulletinInfoService.updateById(editFrom));
     }
 
     /**

@@ -1,7 +1,11 @@
 package com.fank.f1k2.business.controller;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.DiscussionRoomMember;
@@ -10,8 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +33,8 @@ public class DiscussionRoomMemberController {
 
     private final IDiscussionRoomMemberService bulletinInfoService;
 
+    private final IStaffInfoService staffInfoService;
+
     /**
      * 分页获取讨论房间成员表
      *
@@ -37,6 +45,67 @@ public class DiscussionRoomMemberController {
     @GetMapping("/page")
     public R page(Page<DiscussionRoomMember> page, DiscussionRoomMember queryFrom) {
         return R.ok(bulletinInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 根据房间ID查询讨论房间成员表
+     *
+     * @param roomId 房间ID
+     * @return 列表
+     */
+    @GetMapping("/queryRoomMember")
+    public R queryRoomMember(Integer roomId) {
+        List<DiscussionRoomMember> list = bulletinInfoService.list(Wrappers.<DiscussionRoomMember>lambdaQuery().eq(DiscussionRoomMember::getRoomId, roomId).eq(DiscussionRoomMember::getMemberStatus, 1));
+        if (CollectionUtil.isEmpty(list)) {
+            return R.ok(Collections.emptyList());
+        }
+        List<StaffInfo> staffInfoList = staffInfoService.list(Wrappers.<StaffInfo>lambdaQuery().in(StaffInfo::getId, list.stream().map(DiscussionRoomMember::getUserId).collect(Collectors.toList())));
+        return R.ok(staffInfoList);
+    }
+
+    /**
+     * 添加讨论房间成员表
+     *
+     * @param roomId 房间ID
+     * @param userId 用户ID
+     * @return 添加结果
+     */
+    @GetMapping("/addRoomMember")
+    public R addRoomMember(Integer roomId, Integer userId) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+
+        DiscussionRoomMember discussionRoomMember = bulletinInfoService.getOne(Wrappers.<DiscussionRoomMember>lambdaQuery().eq(DiscussionRoomMember::getRoomId, roomId).eq(DiscussionRoomMember::getUserId, staffInfo.getId()));
+        if (discussionRoomMember != null && discussionRoomMember.getMemberStatus() == 2) {
+            discussionRoomMember.setMemberStatus(1);
+            discussionRoomMember.setLeaveTime(null);
+            discussionRoomMember.setJoinTime(DateUtil.formatDateTime(new Date()));
+            return R.ok(bulletinInfoService.updateById(discussionRoomMember));
+        } else {
+            discussionRoomMember = new DiscussionRoomMember();
+            discussionRoomMember.setUserId(staffInfo.getId());
+            discussionRoomMember.setJoinTime(DateUtil.formatDateTime(new Date()));
+            discussionRoomMember.setMemberStatus(1);
+            return R.ok(bulletinInfoService.save(discussionRoomMember));
+        }
+    }
+
+    /**
+     * 退出讨论房间
+     *
+     * @param roomId 房间ID
+     * @param userId 用户ID
+     * @return 退出结果
+     */
+    @GetMapping("/exitRoom")
+    public R exitRoom(Integer roomId, Integer userId) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+        DiscussionRoomMember discussionRoomMember = bulletinInfoService.getOne(Wrappers.<DiscussionRoomMember>lambdaQuery().eq(DiscussionRoomMember::getRoomId, roomId).eq(DiscussionRoomMember::getUserId, staffInfo.getId()));
+        if (discussionRoomMember != null) {
+            discussionRoomMember.setLeaveTime(DateUtil.formatDateTime(new Date()));
+            discussionRoomMember.setMemberStatus(2);
+            return R.ok(bulletinInfoService.updateById(discussionRoomMember));
+        }
+        return R.ok(false);
     }
 
     /**
