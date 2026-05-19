@@ -176,17 +176,6 @@ export default {
         dataIndex: 'scoringStandard',
         ellipsis: true
       }, {
-        title: '截止时间',
-        dataIndex: 'deadline',
-        customRender: (text, row, index) => {
-          if (text !== null && text !== undefined) {
-            return text
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
         title: '状态',
         dataIndex: 'status',
         customRender: (text, row, index) => {

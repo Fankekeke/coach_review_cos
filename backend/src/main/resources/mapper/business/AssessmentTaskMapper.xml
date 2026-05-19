@@ -24,14 +24,14 @@
         FROM assessment_task ast
         LEFT JOIN tag_info ti on (ti.id = ast.tag_id)
         WHERE 1 = 1
-        <if test="queryFrom.taskName != null and queryForm.taskName != ''">
-            AND ast.task_name like CONCAT("%",#{queryForm.taskName},"%")
+        <if test="queryFrom.taskName != null and queryFrom.taskName != ''">
+            AND ast.task_name like CONCAT("%",#{queryFrom.taskName},"%")
         </if>
-        <if test="queryForm.tagName != null and queryForm.tagName != ''">
-            AND ti.name like CONCAT("%",#{queryForm.tagName},"%")
+        <if test="queryFrom.tagName != null and queryFrom.tagName != ''">
+            AND ti.name like CONCAT("%",#{queryFrom.tagName},"%")
         </if>
-        <if test="queryForm.taskType != null and queryForm.taskType != ''">
-            AND ast.task_type = #{queryForm.taskType}
+        <if test="queryFrom.taskType != null and queryFrom.taskType != ''">
+            AND ast.task_type = #{queryFrom.taskType}
         </if>
         ORDER BY ast.create_time DESC
     </select>

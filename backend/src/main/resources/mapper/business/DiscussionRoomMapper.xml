@@ -8,6 +8,7 @@
         dr.id,
         dr.room_name,
         dr.topic,
+        dr.images,
         dr.room_status,
         dr.max_member_count,
         dr.duration_minutes,
@@ -20,14 +21,14 @@
         dr.update_time
         from discussion_room dr
         where 1 = 1
-        <if test="queryForm.roomName != null and queryForm.roomName != ''">
-            AND dr.room_name like CONCAT("%",#{queryForm.roomName},"%")
+        <if test="queryFrom.roomName != null and queryFrom.roomName != ''">
+            AND dr.room_name like CONCAT("%",#{queryFrom.roomName},"%")
         </if>
-        <if test="queryForm.topic != null and queryForm.topic != ''">
-            AND dr.topic like CONCAT("%",#{queryForm.topic},"%")
+        <if test="queryFrom.topic != null and queryFrom.topic != ''">
+            AND dr.topic like CONCAT("%",#{queryFrom.topic},"%")
         </if>
-        <if test="queryForm.roomStatus != null and queryForm.roomStatus != ''">
-            AND dr.room_status = #{queryForm.roomStatus}
+        <if test="queryFrom.roomStatus != null and queryFrom.roomStatus != ''">
+            AND dr.room_status = #{queryFrom.roomStatus}
         </if>
         order by dr.create_time desc
     </select>

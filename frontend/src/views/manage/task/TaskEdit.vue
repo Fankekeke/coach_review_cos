@@ -18,16 +18,17 @@
             ]"/>
           </a-form-item>
         </a-col>
-        <a-form-item label='所属方向' v-bind="formItemLayout">
-          <a-select
-            v-decorator="['tagId', { rules: [{ required: true, message: '请选择所属方向!' }] }]"
-            placeholder="请选择所属方向"
-            size="large">
-            <a-select-option v-for="tag in tagList" :key="tag.id" :value="tag.id">
-              {{ tag.name }}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
+        <a-col :span="12">
+          <a-form-item label='所属方向' v-bind="formItemLayout">
+            <a-select
+              v-decorator="['tagId', { rules: [{ required: true, message: '请选择所属方向!' }] }]"
+              placeholder="请选择所属方向">
+              <a-select-option v-for="tag in tagList" :key="tag.id" :value="tag.id">
+                {{ tag.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
         <a-col :span="12">
           <a-form-item label='任务类型' v-bind="formItemLayout">
             <a-select v-decorator="[
@@ -53,14 +54,6 @@
             </a-select>
           </a-form-item>
         </a-col>
-        <a-col :span="12">
-          <a-form-item label='方向ID' v-bind="formItemLayout">
-            <a-input-number v-decorator="[
-            'tagId',
-            { rules: [{ required: true, message: '请输入方向ID!' }] }
-            ]" :min="1" style="width: 100%"/>
-          </a-form-item>
-        </a-col>
         <a-col :span="24">
           <a-form-item label='任务描述' v-bind="formItemLayout">
             <a-textarea :rows="4" v-decorator="[
@@ -82,21 +75,13 @@
             <a-upload
               name="avatar"
               action="http://127.0.0.1:9527/file/fileUpload/"
-              list-type="picture-card"
               :file-list="fileList"
-              @preview="handlePreview"
               @change="picHandleChange"
             >
-              <div v-if="fileList.length < 8">
-                <a-icon type="plus" />
-                <div class="ant-upload-text">
-                  Upload
-                </div>
-              </div>
+              <a-button>
+                <a-icon type="upload" /> 选择文件
+              </a-button>
             </a-upload>
-            <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-              <img alt="example" style="width: 100%" :src="previewImage" />
-            </a-modal>
           </a-form-item>
         </a-col>
         <a-col :span="12">
@@ -230,7 +215,7 @@ export default {
       })
       this.form.validateFields((err, values) => {
         values.id = this.rowId
-        values.images = images.length > 0 ? images.join(',') : null
+        values.referenceMaterial = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
           this.$put('/business/assessment-task', {

@@ -29,16 +29,18 @@
             />
           </a-form-item>
         </a-col>
-        <a-form-item label='讨论时长(分钟)' v-bind="formItemLayout">
-          <a-input-number
-            v-decorator="[
+        <a-col :span="12">
+          <a-form-item label='讨论时长(分钟)' v-bind="formItemLayout">
+            <a-input-number
+              v-decorator="[
                 'durationMinutes',
                 { rules: [{ required: true, message: '请输入讨论时长!' }] }
               ]"
-            :min="5"
-            :max="60"              style="width: 100%"
-          />
-        </a-form-item>
+              :min="5"
+              :max="60"              style="width: 100%"
+            />
+          </a-form-item>
+        </a-col>
         <a-col :span="12">
           <a-form-item label='是否自动开始' v-bind="formItemLayout">
             <a-select v-decorator="[
