@@ -77,7 +77,10 @@ public class AnswerRecordController {
         StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, addFrom.getUserId()));
         addFrom.setUserId(staffInfo.getId());
         addFrom.setCreateDate(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.addAnswerRecord(addFrom));
+        bulletinInfoService.addAnswerRecord(addFrom);
+
+        staffInfoService.calculateStaffScore(staffInfo.getUserId());
+        return R.ok(true);
     }
 
     /**

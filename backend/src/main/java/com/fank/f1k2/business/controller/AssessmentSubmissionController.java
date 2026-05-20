@@ -95,7 +95,11 @@ public class AssessmentSubmissionController {
     public R auditScore(AssessmentSubmission editFrom) {
         editFrom.setSubmissionStatus(2);
         editFrom.setReviewedTime(DateUtil.formatDateTime(new Date()));
-        return R.ok(bulletinInfoService.updateById(editFrom));
+        bulletinInfoService.updateById(editFrom);
+        // 计算员工能力分
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getId, editFrom.getUserId()));
+        staffInfoService.calculateStaffScore(staffInfo.getUserId());
+        return R.ok(true);
     }
 
     /**

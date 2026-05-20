@@ -40,6 +40,17 @@ public class UserAbilityScoreController {
     }
 
     /**
+     * 根据用户ID查询用户能力得分趋势
+     *
+     * @param userId 用户ID
+     * @return 讨论发言记录表列表
+     */
+    @GetMapping("/queryScoreTrendByUser")
+    public R queryScoreTrendByUser(Integer userId) {
+        return R.ok(bulletinInfoService.queryScoreTrendByUser(userId));
+    }
+
+    /**
      * 查询用户能力维度得分表详情
      *
      * @param id 主键ID

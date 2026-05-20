@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author FanK fan1ke2ke@gmail.com（悲伤的橘子树）
@@ -26,5 +27,16 @@ public class DiscussionSpeechRecordServiceImpl extends ServiceImpl<DiscussionSpe
     @Override
     public IPage<LinkedHashMap<String, Object>> queryPage(Page<DiscussionSpeechRecord> page, DiscussionSpeechRecord queryFrom) {
         return baseMapper.queryPage(page, queryFrom);
+    }
+
+    /**
+     * 根据房间ID查询讨论记录
+     *
+     * @param roomId 房间ID
+     * @return 讨论记录
+     */
+    @Override
+    public List<LinkedHashMap<String, Object>> queryRecordByRoomId(Integer roomId) {
+        return baseMapper.queryRecordByRoomId(roomId);
     }
 }

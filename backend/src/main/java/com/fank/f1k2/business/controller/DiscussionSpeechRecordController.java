@@ -2,6 +2,9 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.DiscussionSpeechRecord;
@@ -27,6 +30,8 @@ public class DiscussionSpeechRecordController {
 
     private final IDiscussionSpeechRecordService bulletinInfoService;
 
+    private final IStaffInfoService staffInfoService;
+
     /**
      * 分页获取讨论发言记录表
      *
@@ -37,6 +42,17 @@ public class DiscussionSpeechRecordController {
     @GetMapping("/page")
     public R page(Page<DiscussionSpeechRecord> page, DiscussionSpeechRecord queryFrom) {
         return R.ok(bulletinInfoService.queryPage(page, queryFrom));
+    }
+
+    /**
+     * 根据房间ID查询讨论发言记录表
+     *
+     * @param roomId 房间ID
+     * @return 讨论发言记录表列表
+     */
+    @GetMapping("/queryRecordByRoomId")
+    public R queryRecordByRoomId(Integer roomId) {
+        return R.ok(bulletinInfoService.queryRecordByRoomId(roomId));
     }
 
     /**
@@ -68,6 +84,10 @@ public class DiscussionSpeechRecordController {
      */
     @PostMapping
     public R save(DiscussionSpeechRecord addFrom) {
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, addFrom.getUserId()));
+        addFrom.setUserId(staffInfo.getId());
+        addFrom.setCreateTime(DateUtil.formatDateTime(new Date()));
+        addFrom.setSpeechTime(DateUtil.formatDateTime(new Date()));
         return R.ok(bulletinInfoService.save(addFrom));
     }
 

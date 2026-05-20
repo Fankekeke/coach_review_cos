@@ -1,5 +1,6 @@
 package com.fank.f1k2.business.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,24 +210,49 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
             String dimension = entry.getKey();
             BigDecimal score = entry.getValue();
 
-            UserAbilityScore existingScore = userAbilityScoreMapper.selectOne(
-                    Wrappers.<UserAbilityScore>lambdaQuery()
-                            .eq(UserAbilityScore::getUserId, userId)
-                            .eq(UserAbilityScore::getDimension, dimension)
-            );
+            UserAbilityScore newScore = new UserAbilityScore();
+            newScore.setUserId(userId);
+            newScore.setDimension(dimension);
+            newScore.setRawScore(score);
+            newScore.setFinalScore(score);
+            newScore.setCreateDate(DateUtil.formatDateTime(new Date()));
+            userAbilityScoreMapper.insert(newScore);
+        }
 
-            if (existingScore != null) {
-                existingScore.setRawScore(score);
-                existingScore.setFinalScore(score);
-                userAbilityScoreMapper.updateById(existingScore);
-            } else {
-                UserAbilityScore newScore = new UserAbilityScore();
-                newScore.setUserId(userId);
-                newScore.setDimension(dimension);
-                newScore.setRawScore(score);
-                newScore.setFinalScore(score);
-                userAbilityScoreMapper.insert(newScore);
-            }
+        updateStaffInfoScores(userId, dimensionScores);
+    }
+
+    private void updateStaffInfoScores(Integer userId, Map<String, BigDecimal> dimensionScores) {
+        StaffInfo staffInfo = baseMapper.selectOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+        if (staffInfo == null) {
+            return;
+        }
+
+        boolean needUpdate = false;
+
+        if (dimensionScores.containsKey("专业技能")) {
+            staffInfo.setProfessionalScore(dimensionScores.get("专业技能"));
+            needUpdate = true;
+        }
+        if (dimensionScores.containsKey("沟通能力")) {
+            staffInfo.setCommunicationScore(dimensionScores.get("沟通能力"));
+            needUpdate = true;
+        }
+        if (dimensionScores.containsKey("团队协作")) {
+            staffInfo.setTeamworkScore(dimensionScores.get("团队协作"));
+            needUpdate = true;
+        }
+        if (dimensionScores.containsKey("应急处理")) {
+            staffInfo.setEmergencyScore(dimensionScores.get("应急处理"));
+            needUpdate = true;
+        }
+        if (dimensionScores.containsKey("学习能力")) {
+            staffInfo.setLearningScore(dimensionScores.get("学习能力"));
+            needUpdate = true;
+        }
+
+        if (needUpdate) {
+            baseMapper.updateById(staffInfo);
         }
     }
 }

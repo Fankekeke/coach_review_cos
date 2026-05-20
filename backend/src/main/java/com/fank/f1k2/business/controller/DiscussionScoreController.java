@@ -2,6 +2,9 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IStaffInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.DiscussionScore;
@@ -26,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class DiscussionScoreController {
 
     private final IDiscussionScoreService bulletinInfoService;
+
+    private final IStaffInfoService staffInfoService;
 
     /**
      * 分页获取讨论评分表
@@ -68,7 +73,11 @@ public class DiscussionScoreController {
      */
     @PostMapping
     public R save(DiscussionScore addFrom) {
-        return R.ok(bulletinInfoService.save(addFrom));
+        addFrom.setScoredTime(DateUtil.formatDateTime(new Date()));
+        bulletinInfoService.save(addFrom);
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getId, addFrom.getUserId()));
+        staffInfoService.calculateStaffScore(staffInfo.getUserId());
+        return R.ok(true);
     }
 
     /**

@@ -2,4 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fank.f1k2.business.dao.DiscussionSpeechRecordMapper">
 
+    <select id="queryRecordByRoomId" resultType="java.util.LinkedHashMap">
+        SELECT
+            dr.id,
+            dr.room_id,
+            dr.user_id,
+            dr.speech_content,
+            dr.speech_time,
+            dr.adopted_flag,
+            dr.conflict_resolution_flag,
+            dr.create_time,
+
+            ui.`name` AS userName,
+            ui.images AS userImages,
+        FROM
+            discussion_room dr
+                LEFT JOIN staff_info ui ON (ui.id = dr.user_id)
+        WHERE
+            1 = 1
+        AND dr.room_id = #{roomId}
+        ORDER BY
+            dr.create_time DESC
+    </select>
 </mapper>
