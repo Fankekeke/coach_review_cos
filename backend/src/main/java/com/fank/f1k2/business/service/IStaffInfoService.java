@@ -31,6 +31,14 @@ public interface IStaffInfoService extends IService<StaffInfo> {
     List<LinkedHashMap<String, Object>> queryStaffList(StaffInfo queryFrom);
 
     /**
+     * 获取教练看板信息
+     *
+     * @param userId 用户ID
+     * @return 教练信息
+     */
+    LinkedHashMap<String, Object> queryStaffBoard(Integer userId);
+
+    /**
      * 计算教练积分
      */
     void calculateStaffScore(Integer userId);

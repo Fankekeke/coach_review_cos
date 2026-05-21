@@ -168,7 +168,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void regist(String username, String password) throws Exception {
+    public void regist(String username, String password, String email, String name) throws Exception {
         User user = new User();
         user.setPassword(MD5Util.encrypt(username, password));
         user.setUsername(username);
@@ -185,6 +185,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userInfo.setUserId(Math.toIntExact(user.getUserId()));
         userInfo.setCode("STF-" + System.currentTimeMillis());
         userInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        userInfo.setEmail(email);
+        userInfo.setName(name);
+        userInfo.setUserId(Math.toIntExact(user.getUserId()));
+        userInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        staffInfoService.save(userInfo);
 
         UserRole ur = new UserRole();
         ur.setUserId(user.getUserId());

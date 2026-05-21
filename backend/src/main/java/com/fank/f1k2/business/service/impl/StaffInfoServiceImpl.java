@@ -41,6 +41,10 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
     @Resource
     private UserAbilityScoreMapper userAbilityScoreMapper;
 
+    @Resource
+    private QuestionBankMapper questionBankMapper;
+
+
 
     /**
      * 分页获取教练管理
@@ -63,6 +67,138 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
     @Override
     public List<LinkedHashMap<String, Object>> queryStaffList(StaffInfo queryFrom) {
         return baseMapper.queryStaffList(queryFrom);
+    }
+
+    /**
+     * 获取教练看板信息
+     *
+     * @param userId 用户ID
+     * @return 教练信息
+     */
+    @Override
+    public LinkedHashMap<String, Object> queryStaffBoard(Integer userId) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+        StaffInfo staffInfo = this.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+
+        if (staffInfo == null) {
+            return result;
+        }
+
+        Integer staffTagId = staffInfo.getTagId();
+
+        List<QuestionBank> questionBankList = questionBankMapper.selectList(Wrappers.<QuestionBank>lambdaQuery());
+        List<AssessmentTask> assessmentTaskList = assessmentTaskMapper.selectList(Wrappers.<AssessmentTask>lambdaQuery().eq(AssessmentTask::getStatus, 1));
+
+        List<AnswerRecord> answerRecordList = answerRecordMapper.selectList(Wrappers.<AnswerRecord>lambdaQuery().eq(AnswerRecord::getUserId, staffInfo.getId()));
+        List<AssessmentSubmission> assessmentSubmissionList = assessmentSubmissionMapper.selectList(Wrappers.<AssessmentSubmission>lambdaQuery().eq(AssessmentSubmission::getUserId, staffInfo.getId()));
+
+        List<QuestionBank> matchedQuestionBanks = questionBankList.stream()
+                .filter(qb -> qb.getTagId() == null || qb.getTagId().equals(staffTagId))
+                .collect(Collectors.toList());
+
+        List<AssessmentTask> matchedTasks = assessmentTaskList.stream()
+                .filter(task -> task.getTagId() == null || task.getTagId().equals(staffTagId))
+                .collect(Collectors.toList());
+
+        List<AnswerRecord> completedAnswerRecords = answerRecordList.stream()
+                .filter(record -> matchedQuestionBanks.stream().anyMatch(qb -> qb.getId().equals(record.getBankId())))
+                .collect(Collectors.toList());
+
+        List<AssessmentSubmission> completedSubmissions = assessmentSubmissionList.stream()
+                .filter(submission -> matchedTasks.stream().anyMatch(task -> task.getId().equals(submission.getTaskId())))
+                .collect(Collectors.toList());
+
+        int totalTasks = matchedQuestionBanks.size() + matchedTasks.size();
+
+        int completedQuestionBankCount = (int) matchedQuestionBanks.stream()
+                .filter(qb -> completedAnswerRecords.stream().anyMatch(record -> record.getBankId().equals(qb.getId())))
+                .count();
+
+        int completedTaskCount = (int) matchedTasks.stream()
+                .filter(task -> completedSubmissions.stream()
+                        .anyMatch(submission -> submission.getTaskId().equals(task.getId())
+                                && submission.getSubmissionStatus() != null
+                                && submission.getSubmissionStatus() >= 1))
+                .count();
+
+        int completedCount = completedQuestionBankCount + completedTaskCount;
+        int pendingCount = totalTasks - completedCount;
+
+        BigDecimal averageScore = BigDecimal.ZERO;
+        List<BigDecimal> allScores = new java.util.ArrayList<>();
+
+        completedAnswerRecords.stream()
+                .filter(record -> record.getScore() != null)
+                .forEach(record -> allScores.add(new BigDecimal(record.getScore())));
+
+        completedSubmissions.stream()
+                .filter(submission -> submission.getFinalScore() != null)
+                .forEach(submission -> allScores.add(submission.getFinalScore()));
+
+        if (!allScores.isEmpty()) {
+            BigDecimal totalScore = allScores.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+            averageScore = totalScore.divide(new BigDecimal(allScores.size()), 2, RoundingMode.HALF_UP);
+        }
+
+        result.put("pendingCount", pendingCount);
+        result.put("completedCount", completedCount);
+        result.put("averageScore", averageScore);
+        result.put("totalTasks", totalTasks);
+
+        List<LinkedHashMap<String, Object>> assessmentTaskListFix = new java.util.ArrayList<>();
+
+        matchedQuestionBanks.forEach(qb -> {
+            LinkedHashMap<String, Object> taskInfo = new LinkedHashMap<>();
+            taskInfo.put("id", qb.getId());
+            taskInfo.put("taskName", qb.getName());
+            taskInfo.put("taskType", 1);
+            taskInfo.put("tagId", qb.getTagId());
+            taskInfo.put("dimension", qb.getDimension());
+
+            boolean isCompleted = completedAnswerRecords.stream().anyMatch(record -> record.getBankId().equals(qb.getId()));
+            taskInfo.put("status", isCompleted ? "已完成" : "待完成");
+
+            if (isCompleted) {
+                AnswerRecord record = completedAnswerRecords.stream()
+                        .filter(r -> r.getBankId().equals(qb.getId()))
+                        .findFirst()
+                        .orElse(null);
+                if (record != null && record.getScore() != null) {
+                    taskInfo.put("score", record.getScore());
+                }
+            }
+
+            assessmentTaskListFix.add(taskInfo);
+        });
+
+        matchedTasks.forEach(task -> {
+            LinkedHashMap<String, Object> taskInfo = new LinkedHashMap<>();
+            taskInfo.put("id", task.getId());
+            taskInfo.put("taskName", task.getTaskName());
+            taskInfo.put("taskType", task.getTaskType());
+            taskInfo.put("tagId", task.getTagId());
+            taskInfo.put("taskDimension", task.getTaskDimension());
+
+            AssessmentSubmission submission = completedSubmissions.stream()
+                    .filter(s -> s.getTaskId().equals(task.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (submission != null && submission.getSubmissionStatus() != null && submission.getSubmissionStatus() >= 1) {
+                taskInfo.put("status", "已完成");
+                if (submission.getFinalScore() != null) {
+                    taskInfo.put("score", submission.getFinalScore());
+                }
+            } else {
+                taskInfo.put("status", "待完成");
+            }
+
+            assessmentTaskListFix.add(taskInfo);
+        });
+
+        result.put("assessmentTasks", assessmentTaskListFix);
+
+        return result;
     }
 
     /**

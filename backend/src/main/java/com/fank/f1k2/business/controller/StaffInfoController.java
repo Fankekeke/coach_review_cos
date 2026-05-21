@@ -3,6 +3,9 @@ package com.fank.f1k2.business.controller;
 
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.service.IMailService;
+import com.fank.f1k2.common.service.CacheService;
+import com.fank.f1k2.common.service.RedisService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.StaffInfo;
@@ -12,14 +15,18 @@ import com.fank.f1k2.system.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 /**
  * 教练管理 控制层
@@ -35,6 +42,66 @@ public class StaffInfoController {
     private final IStaffInfoService staffInfoService;
 
     private final UserService userService;
+
+    private final CacheService cacheService;
+
+    private final TemplateEngine templateEngine;
+
+    private final IMailService iMailService;
+
+    private final RedisService redisService;
+
+    /**
+     * 验证码验证
+     * @param validateCode
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("/verification/check")
+    public R verificationCheck(String validateCode, String email) {
+        //1:获取redis里面的验证码信息
+        String code = redisService.get(email);
+        //2:判断验证码是否正确
+        if (!StringUtils.isEmpty(validateCode)) {
+            validateCode = validateCode.toLowerCase();
+            code = code.toLowerCase();
+            if (validateCode.equals(code)) {
+                // 删除key
+                redisService.del(email);
+                return R.ok(true);
+            }
+        }
+        return R.ok(false);
+    }
+
+    /**
+     * 发送注册邮件
+     * @param email
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("/register/email")
+    public R sendRegisterEmail(String email) {
+        // 判断邮箱是否重复
+        Integer count = staffInfoService.count(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getEmail, email));
+        if (count > 0) {
+            return R.ok(false);
+        }
+        // 绘制随机字符
+        String randomString = "";
+        for (int i = 1; i <= 50; i++) {
+            randomString = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+        }
+
+        Context context = new Context();
+        context.setVariable("today", DateUtil.formatDate(new Date()));
+        context.setVariable("verifyCode", randomString);
+        String emailContent = templateEngine.process("registerEmail", context);
+        iMailService.sendHtmlMail(email, "账户验证", emailContent);
+        // 将随机生成的验证码放入Redis中
+        redisService.set(email, randomString);
+        return R.ok(true);
+    }
 
     /**
      * 分页获取教练管理
@@ -95,6 +162,17 @@ public class StaffInfoController {
     @GetMapping("/list")
     public R list() {
         return R.ok(staffInfoService.list());
+    }
+
+    /**
+     * 获取教练看板信息
+     *
+     * @param userId 用户ID
+     * @return 教练信息
+     */
+    @GetMapping("/queryStaffBoard")
+    public R queryStaffBoard(Integer userId) {
+        return R.ok(staffInfoService.queryStaffBoard(userId));
     }
 
     /**
