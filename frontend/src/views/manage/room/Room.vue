@@ -79,6 +79,8 @@
           </template>
         </template>
         <template slot="operation" slot-scope="text, record">
+          <a-icon type="play-circle" theme="twoTone" twoToneColor="#52c41a" @click="startMeeting(record)" title="开始会议" style="margin-right: 8px;" v-if="record.autoStart === 0 && record.roomStatus === 0"></a-icon>
+          <a-icon type="message" theme="twoTone" twoToneColor="#1890ff" @click="viewChatRecord(record)" title="查看聊天记录" style="margin-right: 8px;"></a-icon>
           <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
         </template>
       </a-table>
@@ -234,6 +236,31 @@ export default {
     this.fetch()
   },
   methods: {
+    viewChatRecord (record) {
+      this.$router.push({
+        path: '/AdminRoomDetail',
+        query: { id: record.id }
+      })
+    },
+    startMeeting (record) {
+      this.$confirm({
+        title: '开始会议',
+        content: `确定要开始「${record.roomName}」会议吗？`,
+        okText: '确认开始',
+        cancelText: '取消',
+        onOk: () => {
+          this.$get('/business/discussion-room/start', {
+            id: record.id
+          }).then(r => {
+            this.$message.success('会议已开始')
+            this.search()
+          }).catch(err => {
+            this.$message.error('开始会议失败')
+            console.error(err)
+          })
+        }
+      })
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },

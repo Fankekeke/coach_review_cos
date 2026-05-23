@@ -2,6 +2,11 @@ package com.fank.f1k2.business.controller;
 
 
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fank.f1k2.business.entity.DiscussionRoomMember;
+import com.fank.f1k2.business.entity.StaffInfo;
+import com.fank.f1k2.business.service.IDiscussionRoomMemberService;
+import com.fank.f1k2.business.service.IStaffInfoService;
 import com.fank.f1k2.common.utils.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fank.f1k2.business.entity.DiscussionRoom;
@@ -12,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class DiscussionRoomController {
 
     private final IDiscussionRoomService bulletinInfoService;
+
+    private final IDiscussionRoomMemberService discussionRoomMemberService;
+
+    private final IStaffInfoService staffInfoService;
 
     /**
      * 分页获取讨论房间表
@@ -56,8 +67,37 @@ public class DiscussionRoomController {
      * @return 结果
      */
     @GetMapping("/list")
-    public R list() {
-        return R.ok(bulletinInfoService.list());
+    public R list(Integer userId) {
+        List<DiscussionRoom> roomList = bulletinInfoService.list(Wrappers.<DiscussionRoom>lambdaQuery().ne(DiscussionRoom::getRoomStatus, 2));
+
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, userId));
+        List<DiscussionRoomMember> memberList = discussionRoomMemberService.list(Wrappers.<DiscussionRoomMember>lambdaQuery().eq(DiscussionRoomMember::getUserId, staffInfo.getId()));
+        Map<Integer, DiscussionRoomMember> memberMap = memberList.stream().collect(Collectors.toMap(DiscussionRoomMember::getRoomId, v -> v));
+
+        for (DiscussionRoom room : roomList) {
+            int currentCount = discussionRoomMemberService.count(Wrappers.<DiscussionRoomMember>lambdaQuery()
+                    .eq(DiscussionRoomMember::getRoomId, room.getId())
+                    .eq(DiscussionRoomMember::getMemberStatus, 1));
+            DiscussionRoomMember currentUserMember = memberMap.get(room.getId());
+            room.setCurrentUserMemberFlag(currentUserMember == null ? "0" : "1");
+            room.setCurrentMemberCount(currentCount);
+        }
+
+        return R.ok(roomList);
+    }
+
+    /**
+     * 讨论房间开始
+     *
+     * @param id 讨论房间ID
+     * @return 讨论房间对象
+     */
+    @GetMapping("/start")
+    public R startRoomMeeting(Integer id) {
+        DiscussionRoom room = bulletinInfoService.getById(id);
+        room.setStartTime(DateUtil.formatDateTime(new Date()));
+        room.setRoomStatus(1);
+        return R.ok(bulletinInfoService.updateById(room));
     }
 
     /**

@@ -21,7 +21,7 @@
         <a-col :span="12">
           <a-form-item label='所属方向' v-bind="formItemLayout">
             <a-select
-              v-decorator="['tagId', { rules: [{ required: true, message: '请选择所属方向!' }] }]"
+              v-decorator="['tagId']"
               placeholder="请选择所属方向">
               <a-select-option v-for="tag in tagList" :key="tag.id" :value="tag.id">
                 {{ tag.name }}

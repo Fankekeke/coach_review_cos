@@ -112,9 +112,9 @@ export default {
 
       // 调用后端 API 发送问题获取 AI 回答
       this.$get('/business/ai/aliTyqw', {
-        content: question,
-        userId: this.currentUser ? this.currentUser.userId : ''
+        content: question
       }).then((r) => {
+        console.log(JSON.stringify(r))
         if (r.data.code === 0 && r.data.msg) {
           const aiMessage = {
             type: 'ai',

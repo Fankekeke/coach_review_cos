@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 
@@ -73,6 +75,20 @@ public class DiscussionScoreController {
      */
     @PostMapping
     public R save(DiscussionScore addFrom) {
+        BigDecimal professionalScore = addFrom.getProfessionalScore() != null ? addFrom.getProfessionalScore() : BigDecimal.ZERO;
+        BigDecimal communicationScore = addFrom.getCommunicationScore() != null ? addFrom.getCommunicationScore() : BigDecimal.ZERO;
+        BigDecimal teamworkScore = addFrom.getTeamworkScore() != null ? addFrom.getTeamworkScore() : BigDecimal.ZERO;
+        BigDecimal emergencyScore = addFrom.getEmergencyScore() != null ? addFrom.getEmergencyScore() : BigDecimal.ZERO;
+        BigDecimal learningScore = addFrom.getLearningScore() != null ? addFrom.getLearningScore() : BigDecimal.ZERO;
+
+        BigDecimal totalScore = professionalScore
+                .add(communicationScore)
+                .add(teamworkScore)
+                .add(emergencyScore)
+                .add(learningScore)
+                .divide(new BigDecimal(5), 2, RoundingMode.HALF_UP);
+
+        addFrom.setTotalScore(totalScore);
         addFrom.setScoredTime(DateUtil.formatDateTime(new Date()));
         bulletinInfoService.save(addFrom);
         StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getId, addFrom.getUserId()));

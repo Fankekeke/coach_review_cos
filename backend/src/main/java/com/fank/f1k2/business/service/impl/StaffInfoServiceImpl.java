@@ -108,7 +108,8 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
                 .filter(submission -> matchedTasks.stream().anyMatch(task -> task.getId().equals(submission.getTaskId())))
                 .collect(Collectors.toList());
 
-        int totalTasks = matchedQuestionBanks.size() + matchedTasks.size();
+        int totalQuestionBanks = matchedQuestionBanks.size();
+        int totalTasks = matchedTasks.size();
 
         int completedQuestionBankCount = (int) matchedQuestionBanks.stream()
                 .filter(qb -> completedAnswerRecords.stream().anyMatch(record -> record.getBankId().equals(qb.getId())))
@@ -121,31 +122,36 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
                                 && submission.getSubmissionStatus() >= 1))
                 .count();
 
-        int completedCount = completedQuestionBankCount + completedTaskCount;
-        int pendingCount = totalTasks - completedCount;
+        int pendingQuestionBankCount = totalQuestionBanks - completedQuestionBankCount;
+        int pendingTaskCount = totalTasks - completedTaskCount;
 
-        BigDecimal averageScore = BigDecimal.ZERO;
         List<BigDecimal> allScores = new java.util.ArrayList<>();
 
         completedAnswerRecords.stream()
-                .filter(record -> record.getScore() != null)
-                .forEach(record -> allScores.add(new BigDecimal(record.getScore())));
+                .filter(record -> record.getTotalScore() != null)
+                .forEach(record -> allScores.add(new BigDecimal(record.getTotalScore())));
 
         completedSubmissions.stream()
                 .filter(submission -> submission.getFinalScore() != null)
                 .forEach(submission -> allScores.add(submission.getFinalScore()));
 
+        BigDecimal taskAverageScore = BigDecimal.ZERO;
         if (!allScores.isEmpty()) {
             BigDecimal totalScore = allScores.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-            averageScore = totalScore.divide(new BigDecimal(allScores.size()), 2, RoundingMode.HALF_UP);
+            taskAverageScore = totalScore.divide(new BigDecimal(allScores.size()), 2, RoundingMode.HALF_UP);
         }
 
-        result.put("pendingCount", pendingCount);
-        result.put("completedCount", completedCount);
-        result.put("averageScore", averageScore);
+        result.put("pendingQuestionBankCount", pendingQuestionBankCount);
+        result.put("completedQuestionBankCount", completedQuestionBankCount);
+        result.put("totalQuestionBanks", totalQuestionBanks);
+
+        result.put("pendingTaskCount", pendingTaskCount);
+        result.put("completedTaskCount", completedTaskCount);
         result.put("totalTasks", totalTasks);
 
-        List<LinkedHashMap<String, Object>> assessmentTaskListFix = new java.util.ArrayList<>();
+        result.put("taskAverageScore", taskAverageScore);
+
+        List<LinkedHashMap<String, Object>> questionBankListResult = new java.util.ArrayList<>();
 
         matchedQuestionBanks.forEach(qb -> {
             LinkedHashMap<String, Object> taskInfo = new LinkedHashMap<>();
@@ -163,13 +169,15 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
                         .filter(r -> r.getBankId().equals(qb.getId()))
                         .findFirst()
                         .orElse(null);
-                if (record != null && record.getScore() != null) {
-                    taskInfo.put("score", record.getScore());
+                if (record != null && record.getTotalScore() != null) {
+                    taskInfo.put("score", record.getTotalScore());
                 }
             }
 
-            assessmentTaskListFix.add(taskInfo);
+            questionBankListResult.add(taskInfo);
         });
+
+        List<LinkedHashMap<String, Object>> assessmentTaskListFix = new java.util.ArrayList<>();
 
         matchedTasks.forEach(task -> {
             LinkedHashMap<String, Object> taskInfo = new LinkedHashMap<>();
@@ -196,6 +204,7 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
             assessmentTaskListFix.add(taskInfo);
         });
 
+        result.put("questionBanks", questionBankListResult);
         result.put("assessmentTasks", assessmentTaskListFix);
 
         return result;
@@ -226,89 +235,102 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
                                                              List<DiscussionScore> discussionScoreList) {
         Map<String, BigDecimal> dimensionScores = new LinkedHashMap<>();
 
-        dimensionScores.put("专业技能", calculateProfessionalScore(assessmentSubmissionList, answerRecordList));
-        dimensionScores.put("沟通能力", calculateCommunicationScore(discussionScoreList, answerRecordList));
-        dimensionScores.put("团队协作", calculateTeamworkScore(discussionScoreList, answerRecordList));
-        dimensionScores.put("应急处理", calculateEmergencyScore(discussionScoreList, answerRecordList));
-        dimensionScores.put("学习能力", calculateLearningScore(discussionScoreList, answerRecordList));
+        dimensionScores.put("专业技能", calculateDimensionScoreByDimension(assessmentSubmissionList, answerRecordList, discussionScoreList, "专业技能"));
+        dimensionScores.put("沟通能力", calculateDimensionScoreByDimension(assessmentSubmissionList, answerRecordList, discussionScoreList, "沟通能力"));
+        dimensionScores.put("团队协作", calculateDimensionScoreByDimension(assessmentSubmissionList, answerRecordList, discussionScoreList, "团队协作"));
+        dimensionScores.put("应急处理", calculateDimensionScoreByDimension(assessmentSubmissionList, answerRecordList, discussionScoreList, "应急处理"));
+        dimensionScores.put("学习能力", calculateDimensionScoreByDimension(assessmentSubmissionList, answerRecordList, discussionScoreList, "学习能力"));
 
         return dimensionScores;
     }
 
-    private BigDecimal calculateProfessionalScore(List<AssessmentSubmission> assessmentSubmissionList, List<AnswerRecord> answerRecordList) {
-        BigDecimal assessmentScore = BigDecimal.ZERO;
+    private BigDecimal calculateDimensionScoreByDimension(List<AssessmentSubmission> assessmentSubmissionList,
+                                                          List<AnswerRecord> answerRecordList,
+                                                          List<DiscussionScore> discussionScoreList,
+                                                          String dimension) {
+        List<BigDecimal> allScores = new java.util.ArrayList<>();
+
+        if (discussionScoreList != null && !discussionScoreList.isEmpty()) {
+            List<DiscussionScore> filteredDiscussionScores = discussionScoreList.stream()
+                    .filter(score -> {
+                        BigDecimal scoreValue = getDiscussionScoreByDimension(score, dimension);
+                        return scoreValue != null;
+                    })
+                    .collect(Collectors.toList());
+
+            if (!filteredDiscussionScores.isEmpty()) {
+                BigDecimal totalDiscussionScore = filteredDiscussionScores.stream()
+                        .map(score -> getDiscussionScoreByDimension(score, dimension))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                BigDecimal avgDiscussionScore = totalDiscussionScore.divide(new BigDecimal(filteredDiscussionScores.size()), 2, RoundingMode.HALF_UP);
+                allScores.add(avgDiscussionScore);
+            }
+        }
+
+        if (answerRecordList != null && !answerRecordList.isEmpty()) {
+            List<AnswerRecord> filteredAnswerRecords = answerRecordList.stream()
+                    .filter(record -> dimension.equals(record.getDimension()))
+                    .collect(Collectors.toList());
+
+            if (!filteredAnswerRecords.isEmpty()) {
+                BigDecimal totalAnswerScore = filteredAnswerRecords.stream()
+                        .filter(record -> record.getTotalScore() != null)
+                        .map(record -> new BigDecimal(record.getTotalScore()))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                BigDecimal avgAnswerScore = totalAnswerScore.divide(new BigDecimal(filteredAnswerRecords.size()), 2, RoundingMode.HALF_UP);
+                allScores.add(avgAnswerScore);
+            }
+        }
+
         if (assessmentSubmissionList != null && !assessmentSubmissionList.isEmpty()) {
-            BigDecimal totalScore = assessmentSubmissionList.stream()
-                    .filter(submission -> submission.getFinalScore() != null)
-                    .map(AssessmentSubmission::getFinalScore)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            assessmentScore = totalScore.divide(new BigDecimal(assessmentSubmissionList.size()), 2, RoundingMode.HALF_UP);
+            List<Integer> taskIdsForDimension = assessmentTaskMapper.selectList(Wrappers.<AssessmentTask>lambdaQuery()
+                            .eq(AssessmentTask::getTaskDimension, dimension))
+                    .stream()
+                    .map(AssessmentTask::getId)
+                    .collect(Collectors.toList());
+
+            if (!taskIdsForDimension.isEmpty()) {
+                List<AssessmentSubmission> filteredSubmissions = assessmentSubmissionList.stream()
+                        .filter(submission -> submission.getFinalScore() != null
+                                && taskIdsForDimension.contains(submission.getTaskId()))
+                        .collect(Collectors.toList());
+
+                if (!filteredSubmissions.isEmpty()) {
+                    BigDecimal totalAssessmentScore = filteredSubmissions.stream()
+                            .map(AssessmentSubmission::getFinalScore)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal avgAssessmentScore = totalAssessmentScore.divide(new BigDecimal(filteredSubmissions.size()), 2, RoundingMode.HALF_UP);
+                    allScores.add(avgAssessmentScore);
+                }
+            }
         }
 
-        BigDecimal answerScore = calculateAnswerRecordScoreByDimension(answerRecordList, "专业技能");
-
-        return mergeScores(assessmentScore, answerScore);
-    }
-
-    private BigDecimal calculateCommunicationScore(List<DiscussionScore> discussionScoreList, List<AnswerRecord> answerRecordList) {
-        BigDecimal discussionScore = BigDecimal.ZERO;
-        if (discussionScoreList != null && !discussionScoreList.isEmpty()) {
-            BigDecimal totalScore = discussionScoreList.stream()
-                    .filter(score -> score.getCommunicationScore() != null)
-                    .map(DiscussionScore::getCommunicationScore)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            discussionScore = totalScore.divide(new BigDecimal(discussionScoreList.size()), 2, RoundingMode.HALF_UP);
+        if (allScores.isEmpty()) {
+            return BigDecimal.ZERO;
         }
 
-        BigDecimal answerScore = calculateAnswerRecordScoreByDimension(answerRecordList, "沟通能力");
-
-        return mergeScores(discussionScore, answerScore);
+        BigDecimal totalScore = allScores.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return totalScore.divide(new BigDecimal(allScores.size()), 2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal calculateTeamworkScore(List<DiscussionScore> discussionScoreList, List<AnswerRecord> answerRecordList) {
-        BigDecimal discussionScore = BigDecimal.ZERO;
-        if (discussionScoreList != null && !discussionScoreList.isEmpty()) {
-            BigDecimal totalScore = discussionScoreList.stream()
-                    .filter(score -> score.getTeamworkScore() != null)
-                    .map(DiscussionScore::getTeamworkScore)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            discussionScore = totalScore.divide(new BigDecimal(discussionScoreList.size()), 2, RoundingMode.HALF_UP);
+    private BigDecimal getDiscussionScoreByDimension(DiscussionScore score, String dimension) {
+        switch (dimension) {
+            case "沟通能力":
+                return score.getCommunicationScore();
+            case "团队协作":
+                return score.getTeamworkScore();
+            case "应急处理":
+                return score.getEmergencyScore();
+            case "学习能力":
+                return score.getLearningScore();
+            case "专业技能":
+                return score.getProfessionalScore();
+            default:
+                return null;
         }
-
-        BigDecimal answerScore = calculateAnswerRecordScoreByDimension(answerRecordList, "团队协作");
-
-        return mergeScores(discussionScore, answerScore);
     }
 
-    private BigDecimal calculateEmergencyScore(List<DiscussionScore> discussionScoreList, List<AnswerRecord> answerRecordList) {
-        BigDecimal discussionScore = BigDecimal.ZERO;
-        if (discussionScoreList != null && !discussionScoreList.isEmpty()) {
-            BigDecimal totalScore = discussionScoreList.stream()
-                    .filter(score -> score.getEmergencyScore() != null)
-                    .map(DiscussionScore::getEmergencyScore)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            discussionScore = totalScore.divide(new BigDecimal(discussionScoreList.size()), 2, RoundingMode.HALF_UP);
-        }
 
-        BigDecimal answerScore = calculateAnswerRecordScoreByDimension(answerRecordList, "应急处理");
-
-        return mergeScores(discussionScore, answerScore);
-    }
-
-    private BigDecimal calculateLearningScore(List<DiscussionScore> discussionScoreList, List<AnswerRecord> answerRecordList) {
-        BigDecimal discussionScore = BigDecimal.ZERO;
-        if (discussionScoreList != null && !discussionScoreList.isEmpty()) {
-            BigDecimal totalScore = discussionScoreList.stream()
-                    .filter(score -> score.getLearningScore() != null)
-                    .map(DiscussionScore::getLearningScore)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            discussionScore = totalScore.divide(new BigDecimal(discussionScoreList.size()), 2, RoundingMode.HALF_UP);
-        }
-
-        BigDecimal answerScore = calculateAnswerRecordScoreByDimension(answerRecordList, "学习能力");
-
-        return mergeScores(discussionScore, answerScore);
-    }
 
     private BigDecimal calculateAnswerRecordScoreByDimension(List<AnswerRecord> answerRecordList, String dimension) {
         if (answerRecordList == null || answerRecordList.isEmpty()) {
@@ -324,8 +346,8 @@ public class StaffInfoServiceImpl extends ServiceImpl<StaffInfoMapper, StaffInfo
         }
 
         BigDecimal totalScore = filteredRecords.stream()
-                .filter(record -> record.getScore() != null)
-                .map(record -> new BigDecimal(record.getScore()))
+                .filter(record -> record.getTotalScore() != null)
+                .map(record -> new BigDecimal(record.getTotalScore()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return totalScore.divide(new BigDecimal(filteredRecords.size()), 2, RoundingMode.HALF_UP);

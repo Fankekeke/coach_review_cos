@@ -132,7 +132,7 @@ export default {
         this.$message.warning('请填写邮箱获取验证码！')
         return false
       }
-      this.$get('/cos/user-info/verification/check', {
+      this.$get('/business/staff-info/verification/check', {
         validateCode: data,
         email: this.email
       }).then((r) => {
@@ -154,7 +154,7 @@ export default {
         return false
       } else {
         this.enterText = '发送中..'
-        this.$get('/cos/user-info/register/email', {
+        this.$get('/business/staff-info/register/email', {
           email: data
         }).then((r) => {
           if (r.data.data) {
